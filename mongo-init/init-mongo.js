@@ -2,7 +2,9 @@ db.createCollection('companies', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["_id", "name"],
       properties: {
+        _id: { bsonType: "string", description: "Ticker symbol (primary key)" }, //ticker as id/primary key
         country: { bsonType: "string" },
         currency: { bsonType: "string" },
         exchange: { bsonType: "string" },
@@ -13,7 +15,6 @@ db.createCollection('companies', {
         name: { bsonType: "string" },
         phone: { bsonType: "string" },
         shareOutstanding: { bsonType: "double" },
-        ticker: { bsonType: "string" },
         weburl: { bsonType: "string" }
       }
     }
@@ -25,7 +26,9 @@ db.createCollection('earnings_reports', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["ticker", "year", "quarter"],
       properties: {
+        ticker: { bsonType: "string" },
         date: { bsonType: "string" },
         epsActual: { bsonType: "double" },
         epsEstimate: { bsonType: "double" },
@@ -35,18 +38,19 @@ db.createCollection('earnings_reports', {
         revenueEstimate: { bsonType: "double" },
         symbol: { bsonType: "string" },
         year: { bsonType: "double" },
-        ticker: { bsonType: "string" }
       }
     }
   }
 });
-db.earnings_reports.createIndex({ ticker: 1 });
+db.earnings_reports.createIndex({ ticker: 1, year: 1, quarter: 1 }, { unique: true });
 
 db.createCollection('sec_fillings', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["ticker", "accessNumber"],
       properties: {
+        ticker: { bsonType: "string" },
         accessNumber: { bsonType: "string" },
         symbol: { bsonType: "string" },
         cik: { bsonType: "string" },
@@ -55,18 +59,19 @@ db.createCollection('sec_fillings', {
         acceptedDate: { bsonType: "string" },
         reportUrl: { bsonType: "string" },
         filingUrl: { bsonType: "string" },
-        ticker: { bsonType: "string" }
       }
     }
   }
 });
-db.sec_fillings.createIndex({ ticker: 1 });
+db.sec_fillings.createIndex({ ticker: 1, accessNumber: 1 }, { unique: true });
 
 db.createCollection('news', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["ticker", "id"],
       properties: {
+        ticker: { bsonType: "string" },
         category: { bsonType: "string" },
         datetime: { bsonType: "long" },
         headline: { bsonType: "string" },
@@ -76,18 +81,19 @@ db.createCollection('news', {
         source: { bsonType: "string" },
         summary: { bsonType: "string" },
         url: { bsonType: "string" },
-        ticker: { bsonType: "string" }
       }
     }
   }
 });
-db.news.createIndex({ ticker: 1 });
+db.news.createIndex({ ticker: 1, id: 1 }, { unique: true });
 
 db.createCollection('market_data', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["ticker", "t"],
       properties: {
+        ticker: { bsonType: "string" },
         c: { bsonType: "double" },
         d: { bsonType: "double" },
         dp: { bsonType: "double" },
@@ -96,12 +102,11 @@ db.createCollection('market_data', {
         o: { bsonType: "double" },
         pc: { bsonType: "double" },
         t: { bsonType: "long" },
-        ticker: { bsonType: "string" }
       }
     }
   }
 });
-db.market_data.createIndex({ ticker: 1 });
+db.market_data.createIndex({ ticker: 1, t: 1 }, { unique: true });
 
 // db.createCollection('market_status', {
 //   validator: {
