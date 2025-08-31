@@ -103,38 +103,38 @@ db.createCollection('market_data', {
 });
 db.market_data.createIndex({ ticker: 1 });
 
-db.createCollection('market_status', {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      required: ["exchange", "isOpen", "t", "timezone"],
-      properties: {
-        exchange: {
-          bsonType: "string",
-          description: "must be a string and is required"
-        },
-        holiday: {
-          bsonType: ["string", "null"],
-          description: "must be a string or null"
-        },
-        isOpen: {
-          bsonType: "bool",
-          description: "must be a boolean and is required"
-        },
-        session: {
-          bsonType: ["string", "null"],
-          description: "must be a string or null"
-        },
-        t: {
-          bsonType: "long",
-          description: "must be a long and is required"
-        },
-        timezone: {
-          bsonType: "string",
-          description: "must be a string and is required"
-        }
-      }
-    }
-  }
-});
-db.market_status.createIndex({ exchange: 1 });
+// db.createCollection('market_status', {
+//   validator: {
+//     $jsonSchema: {
+//       bsonType: "object",
+//       required: ["exchange", "isOpen", "t", "timezone"],
+//       properties: {
+//         exchange: {
+//           bsonType: "string",
+//           description: "must be a string and is required"
+//         },
+//         holiday: {
+//           bsonType: ["string", "null"],
+//           description: "must be a string or null"
+//         },
+//         isOpen: {
+//           bsonType: "bool",
+//           description: "must be a boolean and is required"
+//         },
+//         session: {
+//           bsonType: ["string", "null"],
+//           description: "must be a string or null"
+//         },
+//         t: {
+//           bsonType: "long",
+//           description: "must be a long and is required"
+//         },
+//         timezone: {
+//           bsonType: "string",
+//           description: "must be a string and is required"
+//         }
+//       }
+//     }
+//   }
+// });
+// db.market_status.createIndex({ exchange: 1 });
