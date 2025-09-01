@@ -20,7 +20,6 @@ db.createCollection('companies', {
     }
   }
 });
-db.companies.createIndex({ ticker: 1 });
 
 db.createCollection('earnings_reports', {
   validator: {
@@ -36,7 +35,6 @@ db.createCollection('earnings_reports', {
         quarter: { bsonType: "double" },
         revenueActual: { bsonType: "double" },
         revenueEstimate: { bsonType: "double" },
-        symbol: { bsonType: "string" },
         year: { bsonType: "double" },
       }
     }
@@ -52,7 +50,6 @@ db.createCollection('sec_fillings', {
       properties: {
         ticker: { bsonType: "string" },
         accessNumber: { bsonType: "string" },
-        symbol: { bsonType: "string" },
         cik: { bsonType: "string" },
         form: { bsonType: "string" },
         filedDate: { bsonType: "string" },
