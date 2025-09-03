@@ -29,13 +29,13 @@ db.createCollection('earnings_reports', {
       properties: {
         ticker: { bsonType: "string" },
         date: { bsonType: "string" },
-        epsActual: { bsonType: "double" },
-        epsEstimate: { bsonType: "double" },
+        epsActual: { bsonType: ["int", "double"] },
+        epsEstimate: { bsonType: ["int", "double"] },
         hour: { bsonType: "string" },
-        quarter: { bsonType: "double" },
-        revenueActual: { bsonType: "double" },
-        revenueEstimate: { bsonType: "double" },
-        year: { bsonType: "double" },
+        quarter: { bsonType: ["int", "double"] },
+        revenueActual: { bsonType: ["int", "double"] },
+        revenueEstimate: { bsonType: ["int", "double"] },
+        year: { bsonType: ["int", "double"] },
       }
     }
   }
@@ -70,9 +70,9 @@ db.createCollection('news', {
       properties: {
         ticker: { bsonType: "string" },
         category: { bsonType: "string" },
-        datetime: { bsonType: "long" },
+        datetime: { bsonType: ["int", "long", "double"] },
         headline: { bsonType: "string" },
-        id: { bsonType: "long" },
+        id: { bsonType: ["int", "long", "double"] },
         image: { bsonType: "string" },
         related: { bsonType: "string" },
         source: { bsonType: "string" },
