@@ -7,3 +7,4 @@ langchain
 huggingface-hub
 transformers
 streamlit
+finnhub-python
