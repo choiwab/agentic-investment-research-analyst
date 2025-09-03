@@ -2,10 +2,8 @@ import finnhub
 from pymongo import MongoClient
 import time
 
-# Setup Finnhub client
 finnhub_client = finnhub.Client(api_key="d2pjmthr01qnf9nlcku0d2pjmthr01qnf9nlckug")
 
-# Setup Mongo
 client = MongoClient("mongodb://root:password@localhost:27017/")
 db = client["test"]
 
@@ -20,11 +18,6 @@ def extract_news(ticker):
     return finnhub_client.company_news(ticker, _from="2024-01-01", to="2024-12-31")
 
 # ---- TRANSFORM ----
-def transform_profile(data):
-    # set _id = ticker for uniqueness
-    data["_id"] = data["ticker"]
-    return data
-
 def transform_earnings(data, ticker):
     for item in data:
         item["ticker"] = ticker
@@ -54,8 +47,8 @@ def run_pipeline(tickers):
     for ticker in tickers:
         print(f"Processing {ticker}...")
 
-        profile = transform_profile(extract_company_profile(ticker))
-        load_collection("companies", profile)
+        # profile = transform_profile(extract_company_profile(ticker))
+        # load_collection("companies", profile)
 
         earnings = transform_earnings(extract_earnings(ticker), ticker)
         load_collection("earnings_reports", earnings)
@@ -63,8 +56,8 @@ def run_pipeline(tickers):
         news = transform_news(extract_news(ticker), ticker)
         load_collection("news", news)
 
-        time.sleep(1)  # respect API rate limits
+        time.sleep(1) 
 
-# Example usage
+#tryout
 tickers = ["AAPL", "TSLA", "AMZN"]
 run_pipeline(tickers)
