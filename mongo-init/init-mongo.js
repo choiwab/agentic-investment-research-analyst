@@ -98,7 +98,7 @@ db.createCollection('market_data', {
         l: { bsonType: "double" },
         o: { bsonType: "double" },
         pc: { bsonType: "double" },
-        t: { bsonType: "long" },
+        t: { bsonType: ["long", "int"] },
       }
     }
   }
@@ -142,7 +142,7 @@ db.createCollection('financials_reported', {
         endDate: { bsonType: "string" },
         filedDate: { bsonType: "string" },
         acceptedDate: { bsonType: "string" },
-        report: { bsonType: "object" } // balance sheet (bs), cash flow (cf), income (ic)
+        report: { bsonType: "object" }
       }
     }
   }
@@ -176,8 +176,8 @@ db.createCollection('basic_financials', {
       properties: {
         symbol: { bsonType: "string" },
         metricType: { bsonType: "string" },
-        metric: { bsonType: "object" }, // e.g., beta, 52WeekHigh, etc.
-        series: { bsonType: "object" }  // e.g., annual currentRatio, salesPerShare
+        metric: { bsonType: "object" },
+        series: { bsonType: "object" }
       }
     }
   }
