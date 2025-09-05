@@ -105,6 +105,86 @@ db.createCollection('market_data', {
 });
 db.market_data.createIndex({ ticker: 1, t: 1 }, { unique: true });
 
+db.createCollection('earnings_surprises', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["symbol", "year", "quarter"],
+      properties: {
+        symbol: { bsonType: "string" },
+        year: { bsonType: "int" },
+        quarter: { bsonType: "int" },
+        actual: { bsonType: ["double", "int"] },
+        estimate: { bsonType: ["double", "int"] },
+        period: { bsonType: "string" },
+        surprise: { bsonType: ["double", "int"] },
+        surprisePercent: { bsonType: ["double", "int"] }
+      }
+    }
+  }
+});
+db.earnings_surprises.createIndex({ symbol: 1, year: 1, quarter: 1 }, { unique: true });
+
+
+db.createCollection('financials_reported', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["symbol", "accessNumber"],
+      properties: {
+        symbol: { bsonType: "string" },
+        accessNumber: { bsonType: "string" },
+        cik: { bsonType: "string" },
+        year: { bsonType: "int" },
+        quarter: { bsonType: "int" },
+        form: { bsonType: "string" },
+        startDate: { bsonType: "string" },
+        endDate: { bsonType: "string" },
+        filedDate: { bsonType: "string" },
+        acceptedDate: { bsonType: "string" },
+        report: { bsonType: "object" } // balance sheet (bs), cash flow (cf), income (ic)
+      }
+    }
+  }
+});
+db.financials_reported.createIndex({ symbol: 1, accessNumber: 1 }, { unique: true });
+
+
+db.createCollection('insider_sentiment', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["symbol", "year", "month"],
+      properties: {
+        symbol: { bsonType: "string" },
+        year: { bsonType: "int" },
+        month: { bsonType: "int" },
+        change: { bsonType: ["int", "double"] },
+        mspr: { bsonType: ["int", "double"] }
+      }
+    }
+  }
+});
+db.insider_sentiment.createIndex({ symbol: 1, year: 1, month: 1 }, { unique: true });
+
+
+db.createCollection('basic_financials', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["symbol"],
+      properties: {
+        symbol: { bsonType: "string" },
+        metricType: { bsonType: "string" },
+        metric: { bsonType: "object" }, // e.g., beta, 52WeekHigh, etc.
+        series: { bsonType: "object" }  // e.g., annual currentRatio, salesPerShare
+      }
+    }
+  }
+});
+db.basic_financials.createIndex({ symbol: 1 }, { unique: true });
+
+
 // db.createCollection('market_status', {
 //   validator: {
 //     $jsonSchema: {
