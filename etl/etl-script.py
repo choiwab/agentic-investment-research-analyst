@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import time
 import random
 from bson.int64 import Int64
+from datetime import date, timedelta
 
 finnhub_client = finnhub.Client(api_key="d2pjmthr01qnf9nlcku0d2pjmthr01qnf9nlckug")
 
@@ -21,23 +22,27 @@ def extract_symbols(exchange="US"):
 def extract_company_profile(ticker):
     return finnhub_client.company_profile2(symbol=ticker)
 
-def extract_earnings(ticker):
-    return finnhub_client.company_earnings(ticker, limit=40)
+def extract_earnings(ticker, days=30):
+    start = (date.today() - timedelta(days=days)).isoformat()
+    end   = date.today().isoformat()
+    res = finnhub_client.earnings_calendar(_from=start, to=end, symbol=ticker) or {}
+    # unwrap the list
+    return res.get("earningsCalendar", [])
 
 def extract_news(ticker, start=None, end=None):
-    # if no date/year is specified, then take 2024-01-01 to 2024-12-31
+    # if no date/year is specified, then take last 1 year
     if not start or not end:
-        start = "2024-01-01"
-        end = "2024-12-31"
+        start = (date.today()-timedelta(days=365)).isoformat()
+        end = date.today().isoformat()
 
     return finnhub_client.company_news(ticker, _from=start, to=end)
 
 def extract_filings(ticker, start=None, end=None):
     # if no date/year is specified, then take 2024-01-01 to 2024-12-31
     if not start or not end:
-        start = "2024-01-01"
-        end = "2024-12-31"
-    
+        start = (date.today()-timedelta(days=365)).isoformat()
+        end = date.today().isoformat()
+
     if hasattr(finnhub_client, "stock_filings"):
         return finnhub_client.stock_filings(symbol=ticker, _from=start, to=end) or []
     return finnhub_client.filings(symbol=ticker, **{"_from": start, "to": end}) or []    
@@ -193,6 +198,5 @@ def run_pipeline(exchange="US", max_symbols=5):
 
 #tryout
 if __name__ == "__main__":
-    # print(finnhub_client.earnings_calendar(_from="2025-08-10", to="2025-08-30", symbol="", international=False))
-    # print(transform_earnings(extract_earnings("AAPL"), "AAPL"))
+    # print(finnhub_client.earnings_calendar(_from="2025-08-06", to="2025-09-06", symbol="EMAX", international=False))
     run_pipeline(exchange="US", max_symbols=5)
