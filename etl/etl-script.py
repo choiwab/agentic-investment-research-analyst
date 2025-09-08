@@ -207,7 +207,7 @@ def transform_basic_financials(raw, ticker):
     if not raw:
         return None
     # Store one doc per ticker
-    doc = {"_id": ticker}
+    doc = {"_id": ticker, "ticker": ticker}   
     if raw.get("metric"):  doc["metric"] = raw["metric"]      # point-in-time KPIs (P/E, 52W ranges, etc.)
     if raw.get("series"):  doc["series"] = raw["series"]      # time-series ratios by period
     return doc
