@@ -109,9 +109,9 @@ db.createCollection('earnings_surprises', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["symbol", "year", "quarter"],
+      required: ["ticker", "year", "quarter"],
       properties: {
-        symbol: { bsonType: "string" },
+        ticker: { bsonType: "string" },
         year: { bsonType: "int" },
         quarter: { bsonType: "int" },
         actual: { bsonType: ["double", "int"] },
@@ -123,16 +123,16 @@ db.createCollection('earnings_surprises', {
     }
   }
 });
-db.earnings_surprises.createIndex({ symbol: 1, year: 1, quarter: 1 }, { unique: true });
+db.earnings_surprises.createIndex({ ticker: 1, year: 1, quarter: 1 }, { unique: true });
 
 
 db.createCollection('financials_reported', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["symbol", "accessNumber"],
+      required: ["ticker", "accessNumber"],
       properties: {
-        symbol: { bsonType: "string" },
+        ticker: { bsonType: "string" },
         accessNumber: { bsonType: "string" },
         cik: { bsonType: "string" },
         year: { bsonType: "int" },
@@ -147,16 +147,16 @@ db.createCollection('financials_reported', {
     }
   }
 });
-db.financials_reported.createIndex({ symbol: 1, accessNumber: 1 }, { unique: true });
+db.financials_reported.createIndex({ ticker: 1, accessNumber: 1 }, { unique: true });
 
 
 db.createCollection('insider_sentiment', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["symbol", "year", "month"],
+      required: ["ticker", "year", "month"],
       properties: {
-        symbol: { bsonType: "string" },
+        ticker: { bsonType: "string" },
         year: { bsonType: "int" },
         month: { bsonType: "int" },
         change: { bsonType: ["int", "double"] },
@@ -165,16 +165,16 @@ db.createCollection('insider_sentiment', {
     }
   }
 });
-db.insider_sentiment.createIndex({ symbol: 1, year: 1, month: 1 }, { unique: true });
+db.insider_sentiment.createIndex({ ticker: 1, year: 1, month: 1 }, { unique: true });
 
 
 db.createCollection('basic_financials', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["symbol"],
+      required: ["ticker"],
       properties: {
-        symbol: { bsonType: "string" },
+        ticker: { bsonType: "string" },
         metricType: { bsonType: "string" },
         metric: { bsonType: "object" }, // e.g., beta, 52WeekHigh, etc.
         series: { bsonType: "object" }  // e.g., annual currentRatio, salesPerShare
@@ -182,7 +182,7 @@ db.createCollection('basic_financials', {
     }
   }
 });
-db.basic_financials.createIndex({ symbol: 1 }, { unique: true });
+db.basic_financials.createIndex({ ticker: 1 }, { unique: true });
 
 
 // db.createCollection('market_status', {
