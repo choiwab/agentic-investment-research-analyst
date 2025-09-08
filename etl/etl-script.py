@@ -5,9 +5,9 @@ import random
 from bson.int64 import Int64
 from datetime import date, timedelta
 
-finnhub_client = finnhub.Client(api_key="d2pjmthr01qnf9nlcku0d2pjmthr01qnf9nlckug")
+finnhub_client = finnhub.Client(api_key="d2uotr1r01qq994gloi0d2uotr1r01qq994gloig")
 
-client = MongoClient("mongodb://root:password@localhost:27017/")
+client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
 db = client["test"]
 
 # ---- EXTRACT ----
@@ -52,6 +52,23 @@ def extract_quote(ticker):
     q["ticker"] = ticker
     return q
 
+def extract_earnings_surprises(ticker, limit=8):
+    return finnhub_client.company_earnings(ticker, limit=limit) or []
+
+def extract_financials_reported(ticker, freq="quarterly", days=365):
+    _from = (date.today()-timedelta(days=days)).isoformat()
+    _to   = date.today().isoformat()
+    res = finnhub_client.financials_reported(symbol=ticker, freq=freq, _from=_from, to=_to) or {}
+    return res.get("data", [])  
+
+def extract_insider_sentiment(ticker, days=365):
+    _from = (date.today()-timedelta(days=days)).isoformat()
+    _to   = date.today().isoformat()
+    res = finnhub_client.stock_insider_sentiment(ticker, _from, _to) or {}
+    return res.get("data", [])
+
+def extract_basic_financials(ticker, metric="all"):
+    return finnhub_client.company_basic_financials(symbol=ticker, metric=metric) or {}
 
 
 # ---- TRANSFORM ----
@@ -134,6 +151,66 @@ def transform_market_data(raw, ticker):
     d["t"] = Int64(int(raw["t"]))
     return d
 
+def transform_earnings_surprises(rows, ticker):
+    cleaned = []
+    for r in rows or []:
+        if r.get("year") is None or r.get("quarter") is None:
+            continue
+        d = {
+            "ticker": ticker,
+            "year": int(r["year"]),
+            "quarter": int(r["quarter"])
+        }
+        if r.get("period"): d["period"] = r["period"]
+        for f in ("actual","estimate","surprise","surprisePercent"):
+            if r.get(f) is not None:
+                d[f] = float(r[f])
+        cleaned.append(d)
+    return cleaned
+
+def transform_financials_reported(rows, ticker):
+    cleaned = []
+    for r in rows or []:
+        access = r.get("accessNumber")
+        if not access:
+            continue
+        d = {
+            "ticker": ticker,
+            "accessNumber": access
+        }
+        # metadata
+        for k in ("cik","form","year","quarter","startDate","endDate","filedDate","acceptedDate"):
+            if r.get(k) is not None:
+                d[k] = r[k]
+        # the full report object (bs/cf/ic) can be large; keep as-is
+        if r.get("report"): d["report"] = r["report"]
+        cleaned.append(d)
+    return cleaned
+
+def transform_insider_sentiment(rows, ticker):
+    cleaned = []
+    for r in rows or []:
+        if r.get("year") is None or r.get("month") is None:
+            continue
+        d = {
+            "ticker": ticker,
+            "year": int(r["year"]),
+            "month": int(r["month"])
+        }
+        # change (net buys), mspr (monthly share purchase ratio)
+        if r.get("change") is not None: d["change"] = float(r["change"])
+        if r.get("mspr")  is not None: d["mspr"]  = float(r["mspr"])
+        cleaned.append(d)
+    return cleaned
+
+def transform_basic_financials(raw, ticker):
+    if not raw:
+        return None
+    # Store one doc per ticker
+    doc = {"_id": ticker}
+    if raw.get("metric"):  doc["metric"] = raw["metric"]      # point-in-time KPIs (P/E, 52W ranges, etc.)
+    if raw.get("series"):  doc["series"] = raw["series"]      # time-series ratios by period
+    return doc
 
 
 # ---- LOAD ----
@@ -193,6 +270,39 @@ def run_pipeline(exchange="US", max_symbols=5):
                 {"$set": mkt},
                 upsert=True
             )
+
+        # earnings surprises (historical)
+        for d in transform_earnings_surprises(extract_earnings_surprises(ticker), ticker):
+            # print(f"Upserting earnings surprise: {d}") 
+            db.earnings_surprises.update_one(
+                {"ticker": d["ticker"], "year": d["year"], "quarter": d["quarter"]},
+                {"$set": d},
+                upsert=True
+            )
+
+        # financials as reported
+        for d in transform_financials_reported(extract_financials_reported(ticker, freq="quarterly"), ticker):
+            # print(f"Upserting financials as reported: {d}") 
+            db.financials_reported.update_one(
+                {"ticker": d["ticker"], "accessNumber": d["accessNumber"]},
+                {"$set": d},
+                upsert=True
+            )
+
+        # insider sentiment
+        for d in transform_insider_sentiment(extract_insider_sentiment(ticker), ticker):
+            print(f"Upserting insider sentiment: {d}") 
+            db.insider_sentiment.update_one(
+                {"ticker": d["ticker"], "year": d["year"], "month": d["month"]},
+                {"$set": d},
+                upsert=True
+            )
+
+        # basic financials
+        bf = transform_basic_financials(extract_basic_financials(ticker), ticker)
+        if bf:
+            # print(f"Upserting basic financials: {bf}") 
+            db.basic_financials.update_one({"_id": bf["_id"]}, {"$set": bf}, upsert=True)
 
         time.sleep(random.uniform(1.0,3.0))
 
