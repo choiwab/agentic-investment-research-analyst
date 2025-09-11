@@ -1,1 +1,3 @@
 .env
+financial_data_dag.py.log
+dag_processor_manager.log
