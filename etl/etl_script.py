@@ -4,11 +4,22 @@ import time
 import random
 from bson.int64 import Int64
 from datetime import date, timedelta
+import os
 
-finnhub_client = finnhub.Client(api_key="d2uotr1r01qq994gloi0d2uotr1r01qq994gloig")
+# client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
+# db = client["test"]
+def get_mongo_client():
+    if os.getenv('AIRFLOW__CORE__EXECUTOR'):
+        # Use Docker service name
+        return MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
+    else:
+        # Use localhost for local development
+        return MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
 
-client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
+# Replace the existing client initialization
+client = get_mongo_client()
 db = client["test"]
+finnhub_client = finnhub.Client(api_key="d2pjmthr01qnf9nlcku0d2pjmthr01qnf9nlckug")
 
 # ---- EXTRACT ----
 def extract_symbols(exchange="US"):

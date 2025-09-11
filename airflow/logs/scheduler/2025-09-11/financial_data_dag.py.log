@@ -1,0 +1,1270 @@
+[2025-09-11T08:50:57.960+0000] {processor.py:157} INFO - Started process (PID=164) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:50:57.961+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:50:57.962+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:50:57.961+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:50:57.981+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:50:57.980+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:50:57.981+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:50:57.994+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.037 seconds
+[2025-09-11T08:51:28.235+0000] {processor.py:157} INFO - Started process (PID=190) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:51:28.236+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:51:28.237+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:51:28.237+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:51:28.249+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:51:28.248+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:51:28.249+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:51:28.264+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.033 seconds
+[2025-09-11T08:51:58.541+0000] {processor.py:157} INFO - Started process (PID=216) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:51:58.542+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:51:58.543+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:51:58.542+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:51:58.555+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:51:58.553+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:51:58.555+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:51:58.576+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.043 seconds
+[2025-09-11T08:52:28.831+0000] {processor.py:157} INFO - Started process (PID=234) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:52:28.832+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:52:28.833+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:52:28.833+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:52:28.848+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:52:28.846+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:52:28.848+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:52:28.867+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.040 seconds
+[2025-09-11T08:52:59.121+0000] {processor.py:157} INFO - Started process (PID=260) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:52:59.123+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:52:59.125+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:52:59.124+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:52:59.142+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:52:59.140+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:52:59.142+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:52:59.158+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.042 seconds
+[2025-09-11T08:53:19.320+0000] {processor.py:157} INFO - Started process (PID=279) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:19.322+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:53:19.323+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:53:19.323+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:19.348+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:53:19.346+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:53:19.349+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:19.367+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.051 seconds
+[2025-09-11T08:53:20.344+0000] {processor.py:157} INFO - Started process (PID=284) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:20.345+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:53:20.345+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:53:20.345+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:20.353+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:53:20.352+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:53:20.353+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:20.365+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.024 seconds
+[2025-09-11T08:53:50.842+0000] {processor.py:157} INFO - Started process (PID=310) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:50.843+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:53:50.844+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:53:50.844+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:50.852+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:53:50.851+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:53:50.852+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:53:50.864+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.025 seconds
+[2025-09-11T08:54:21.174+0000] {processor.py:157} INFO - Started process (PID=337) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:54:21.176+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:54:21.177+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:54:21.177+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:54:21.193+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:54:21.191+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:54:21.194+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:54:21.220+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.051 seconds
+[2025-09-11T08:54:51.464+0000] {processor.py:157} INFO - Started process (PID=363) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:54:51.466+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:54:51.467+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:54:51.466+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:54:51.479+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:54:51.477+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:54:51.479+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:54:51.504+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.051 seconds
+[2025-09-11T08:55:21.812+0000] {processor.py:157} INFO - Started process (PID=382) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:55:21.814+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:55:21.815+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:55:21.815+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:55:21.833+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:55:21.831+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:55:21.833+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:55:21.865+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.058 seconds
+[2025-09-11T08:55:52.101+0000] {processor.py:157} INFO - Started process (PID=408) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:55:52.102+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:55:52.102+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:55:52.102+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:55:52.112+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:55:52.110+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:55:52.112+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:55:52.127+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.029 seconds
+[2025-09-11T08:56:22.549+0000] {processor.py:157} INFO - Started process (PID=434) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:56:22.550+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:56:22.551+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:56:22.551+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:56:22.586+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:56:22.582+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:56:22.587+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:56:22.685+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.145 seconds
+[2025-09-11T08:56:52.922+0000] {processor.py:157} INFO - Started process (PID=460) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:56:52.926+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:56:52.927+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:56:52.927+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:56:52.942+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:56:52.939+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:56:52.942+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:56:52.972+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.057 seconds
+[2025-09-11T08:57:23.237+0000] {processor.py:157} INFO - Started process (PID=479) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:57:23.240+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:57:23.242+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:57:23.241+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:57:23.259+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:57:23.256+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:57:23.260+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:57:23.282+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.054 seconds
+[2025-09-11T08:57:53.477+0000] {processor.py:157} INFO - Started process (PID=505) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:57:53.481+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:57:53.483+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:57:53.482+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:57:53.494+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:57:53.493+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 12, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:57:53.494+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:57:53.511+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.040 seconds
+[2025-09-11T08:58:08.632+0000] {processor.py:157} INFO - Started process (PID=524) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:08.634+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:58:08.635+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:58:08.634+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:08.650+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:58:08.648+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:58:08.650+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:08.674+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.046 seconds
+[2025-09-11T08:58:25.864+0000] {processor.py:157} INFO - Started process (PID=536) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:25.867+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:58:25.869+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:58:25.868+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:25.902+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:58:25.899+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 13, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:58:25.903+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:25.929+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.074 seconds
+[2025-09-11T08:58:32.954+0000] {processor.py:157} INFO - Started process (PID=548) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:32.955+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:58:32.957+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:58:32.956+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:32.975+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:58:32.973+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:58:32.976+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:58:32.995+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.046 seconds
+[2025-09-11T08:59:03.392+0000] {processor.py:157} INFO - Started process (PID=574) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:59:03.393+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:59:03.394+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:59:03.393+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:59:03.411+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:59:03.409+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:59:03.411+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:59:03.444+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.061 seconds
+[2025-09-11T08:59:33.736+0000] {processor.py:157} INFO - Started process (PID=593) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:59:33.738+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T08:59:33.740+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:59:33.739+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:59:33.769+0000] {logging_mixin.py:151} INFO - [2025-09-11T08:59:33.768+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T08:59:33.770+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T08:59:33.790+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.062 seconds
+[2025-09-11T09:00:04.079+0000] {processor.py:157} INFO - Started process (PID=619) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:04.081+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:00:04.083+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:00:04.082+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:04.115+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:00:04.114+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:00:04.115+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:04.132+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.059 seconds
+[2025-09-11T09:00:15.750+0000] {processor.py:157} INFO - Started process (PID=631) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:15.756+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:00:15.759+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:00:15.758+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:15.791+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:00:15.787+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:00:15.791+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:15.841+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.118 seconds
+[2025-09-11T09:00:36.012+0000] {processor.py:157} INFO - Started process (PID=650) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:36.014+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:00:36.016+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:00:36.015+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:36.048+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:00:36.046+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:00:36.048+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:00:36.078+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.073 seconds
+[2025-09-11T09:01:06.343+0000] {processor.py:157} INFO - Started process (PID=676) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:01:06.346+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:01:06.348+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:01:06.347+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:01:06.360+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:01:06.358+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:01:06.360+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:01:06.376+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.037 seconds
+[2025-09-11T09:01:36.721+0000] {processor.py:157} INFO - Started process (PID=702) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:01:36.723+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:01:36.725+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:01:36.724+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:01:36.746+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:01:36.742+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:01:36.747+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:01:36.772+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.057 seconds
+[2025-09-11T09:02:07.090+0000] {processor.py:157} INFO - Started process (PID=728) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:02:07.092+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:02:07.094+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:02:07.093+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:02:07.109+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:02:07.108+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:02:07.109+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:02:07.127+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.049 seconds
+[2025-09-11T09:02:37.462+0000] {processor.py:157} INFO - Started process (PID=747) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:02:37.464+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:02:37.465+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:02:37.465+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:02:37.567+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:02:37.548+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:02:37.570+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:02:37.647+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.194 seconds
+[2025-09-11T09:03:07.844+0000] {processor.py:157} INFO - Started process (PID=773) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:03:07.846+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:03:07.848+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:03:07.847+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:03:07.864+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:03:07.862+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:03:07.865+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:03:07.898+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.061 seconds
+[2025-09-11T09:03:38.244+0000] {processor.py:157} INFO - Started process (PID=800) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:03:38.246+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:03:38.247+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:03:38.246+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:03:38.261+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:03:38.259+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:03:38.261+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:03:38.284+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.044 seconds
+[2025-09-11T09:04:08.745+0000] {processor.py:157} INFO - Started process (PID=826) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:04:08.747+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:04:08.749+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:04:08.748+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:04:08.770+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:04:08.768+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:04:08.770+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:04:08.792+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.053 seconds
+[2025-09-11T09:04:39.048+0000] {processor.py:157} INFO - Started process (PID=852) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:04:39.050+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:04:39.051+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:04:39.051+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:04:39.066+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:04:39.064+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:04:39.066+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:04:39.138+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.093 seconds
+[2025-09-11T09:05:09.371+0000] {processor.py:157} INFO - Started process (PID=871) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:05:09.372+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:05:09.374+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:05:09.373+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:05:09.390+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:05:09.388+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:05:09.390+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:05:09.409+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.045 seconds
+[2025-09-11T09:05:39.644+0000] {processor.py:157} INFO - Started process (PID=897) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:05:39.646+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:05:39.648+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:05:39.647+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:05:39.664+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:05:39.662+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:05:39.664+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:05:39.685+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.049 seconds
+[2025-09-11T09:06:10.039+0000] {processor.py:157} INFO - Started process (PID=923) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:10.040+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:06:10.042+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:06:10.041+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:10.065+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:06:10.063+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:06:10.065+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:10.085+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.052 seconds
+[2025-09-11T09:06:30.336+0000] {processor.py:157} INFO - Started process (PID=942) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:30.338+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:06:30.340+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:06:30.339+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:30.359+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:06:30.358+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:06:30.360+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:30.379+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.048 seconds
+[2025-09-11T09:06:31.357+0000] {processor.py:157} INFO - Started process (PID=947) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:31.358+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:06:31.359+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:06:31.358+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:31.371+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:06:31.370+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:06:31.372+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:06:31.388+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.035 seconds
+[2025-09-11T09:07:01.770+0000] {processor.py:157} INFO - Started process (PID=973) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:07:01.772+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:07:01.773+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:07:01.773+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:07:01.783+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:07:01.782+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:07:01.783+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:07:01.797+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.031 seconds
+[2025-09-11T09:07:32.188+0000] {processor.py:157} INFO - Started process (PID=992) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:07:32.189+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:07:32.191+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:07:32.190+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:07:32.207+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:07:32.205+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+ModuleNotFoundError: No module named 'etl_script'
+[2025-09-11T09:07:32.207+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:07:32.232+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.051 seconds
+[2025-09-11T09:08:02.659+0000] {processor.py:157} INFO - Started process (PID=1018) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:08:02.661+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:08:02.663+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:08:02.662+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:08:02.693+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:08:02.691+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:08:02.693+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:08:02.723+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.076 seconds
+[2025-09-11T09:08:33.006+0000] {processor.py:157} INFO - Started process (PID=1044) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:08:33.009+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:08:33.011+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:08:33.010+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:08:33.023+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:08:33.022+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:08:33.024+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:08:33.041+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.043 seconds
+[2025-09-11T09:09:03.296+0000] {processor.py:157} INFO - Started process (PID=1070) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:09:03.298+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:09:03.299+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:09:03.299+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:09:03.312+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:09:03.310+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:09:03.312+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:09:03.327+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.038 seconds
+[2025-09-11T09:09:33.590+0000] {processor.py:157} INFO - Started process (PID=1096) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:09:33.591+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:09:33.592+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:09:33.592+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:09:33.609+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:09:33.607+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:09:33.609+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:09:33.627+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.043 seconds
+[2025-09-11T09:10:03.973+0000] {processor.py:157} INFO - Started process (PID=1115) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:10:03.976+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:10:03.977+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:10:03.977+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:10:03.998+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:10:03.996+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:10:03.998+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:10:04.015+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.053 seconds
+[2025-09-11T09:10:34.319+0000] {processor.py:157} INFO - Started process (PID=1141) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:10:34.323+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:10:34.325+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:10:34.325+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:10:34.340+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:10:34.338+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:10:34.340+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:10:34.355+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.042 seconds
+[2025-09-11T09:11:04.678+0000] {processor.py:157} INFO - Started process (PID=1167) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:04.680+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:11:04.681+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:11:04.680+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:04.697+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:11:04.695+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl_script import (
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:11:04.697+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:04.719+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.046 seconds
+[2025-09-11T09:11:13.830+0000] {processor.py:157} INFO - Started process (PID=1179) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:13.831+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:11:13.832+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:11:13.832+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:13.848+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:11:13.847+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl.etl_script  import (
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:11:13.848+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:13.864+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.039 seconds
+[2025-09-11T09:11:44.195+0000] {processor.py:157} INFO - Started process (PID=1205) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:44.198+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:11:44.200+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:11:44.199+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:44.219+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:11:44.217+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl.etl_script  import (
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:11:44.220+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:11:44.237+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.048 seconds
+[2025-09-11T09:12:14.583+0000] {processor.py:157} INFO - Started process (PID=1225) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:12:14.585+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:12:14.586+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:12:14.585+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:12:14.606+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:12:14.605+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 11, in <module>
+    from etl.etl_script  import (
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:12:14.606+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:12:14.625+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.048 seconds
+[2025-09-11T09:12:40.866+0000] {processor.py:157} INFO - Started process (PID=1250) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:12:40.868+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:12:40.870+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:12:40.869+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:12:40.895+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:12:40.893+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:12:40.895+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:12:40.913+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.053 seconds
+[2025-09-11T09:13:03.094+0000] {processor.py:157} INFO - Started process (PID=1268) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:03.096+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:13:03.097+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:13:03.096+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:03.111+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:13:03.110+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:13:03.111+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:03.124+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.035 seconds
+[2025-09-11T09:13:13.240+0000] {processor.py:157} INFO - Started process (PID=1280) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:13.242+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:13:13.243+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:13:13.242+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:13.264+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:13:13.262+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:13:13.264+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:13.297+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.062 seconds
+[2025-09-11T09:13:43.517+0000] {processor.py:157} INFO - Started process (PID=1306) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:43.520+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:13:43.522+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:13:43.521+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:43.543+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:13:43.541+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:13:43.544+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:13:43.571+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.062 seconds
+[2025-09-11T09:14:13.851+0000] {processor.py:157} INFO - Started process (PID=1332) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:14:13.852+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:14:13.853+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:14:13.852+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:14:13.863+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:14:13.862+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:14:13.863+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:14:13.877+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.029 seconds
+[2025-09-11T09:14:44.186+0000] {processor.py:157} INFO - Started process (PID=1351) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:14:44.188+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:14:44.190+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:14:44.189+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:14:44.204+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:14:44.203+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:14:44.205+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:14:44.223+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.043 seconds
+[2025-09-11T09:15:09.472+0000] {processor.py:157} INFO - Started process (PID=1377) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:09.474+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:15:09.475+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:15:09.475+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:09.492+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:15:09.491+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:15:09.492+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:09.506+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.037 seconds
+[2025-09-11T09:15:26.667+0000] {processor.py:157} INFO - Started process (PID=1389) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:26.669+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:15:26.670+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:15:26.669+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:26.707+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:15:26.704+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:15:26.707+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:26.731+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.069 seconds
+[2025-09-11T09:15:57.101+0000] {processor.py:157} INFO - Started process (PID=1415) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:57.102+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:15:57.103+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:15:57.103+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:57.116+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:15:57.115+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:15:57.116+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:15:57.131+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.036 seconds
+[2025-09-11T09:16:27.478+0000] {processor.py:157} INFO - Started process (PID=1441) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:16:27.481+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:16:27.483+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:16:27.482+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:16:27.511+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:16:27.509+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:16:27.512+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:16:27.548+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.076 seconds
+[2025-09-11T09:16:57.772+0000] {processor.py:157} INFO - Started process (PID=1467) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:16:57.773+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:16:57.774+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:16:57.773+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:16:57.788+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:16:57.786+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    from etl import etl_script
+ModuleNotFoundError: No module named 'etl'
+[2025-09-11T09:16:57.789+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:16:57.804+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.037 seconds
+[2025-09-11T09:17:26.181+0000] {processor.py:157} INFO - Started process (PID=1486) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:26.183+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:17:26.184+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:17:26.183+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:26.205+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:17:26.203+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:17:26.206+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:26.223+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.048 seconds
+[2025-09-11T09:17:27.209+0000] {processor.py:157} INFO - Started process (PID=1491) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:27.210+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:17:27.211+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:17:27.211+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:27.226+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:17:27.225+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:17:27.227+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:27.245+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.043 seconds
+[2025-09-11T09:17:57.559+0000] {processor.py:157} INFO - Started process (PID=1517) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:57.563+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:17:57.564+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:17:57.564+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:57.582+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:17:57.580+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:17:57.582+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:17:57.603+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.048 seconds
+[2025-09-11T09:18:27.871+0000] {processor.py:157} INFO - Started process (PID=1543) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:18:27.873+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:18:27.875+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:18:27.874+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:18:27.902+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:18:27.901+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:18:27.903+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:18:27.925+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.061 seconds
+[2025-09-11T09:18:58.148+0000] {processor.py:157} INFO - Started process (PID=1569) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:18:58.150+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:18:58.152+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:18:58.151+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:18:58.168+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:18:58.167+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:18:58.169+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:18:58.186+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.046 seconds
+[2025-09-11T09:19:28.412+0000] {processor.py:157} INFO - Started process (PID=1595) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:19:28.413+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:19:28.414+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:19:28.414+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:19:28.424+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:19:28.423+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:19:28.425+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:19:28.437+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.027 seconds
+[2025-09-11T09:19:58.791+0000] {processor.py:157} INFO - Started process (PID=1614) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:19:58.793+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:19:58.797+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:19:58.794+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:19:58.827+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:19:58.825+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:19:58.828+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:19:58.857+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.075 seconds
+[2025-09-11T09:20:29.144+0000] {processor.py:157} INFO - Started process (PID=1640) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:20:29.147+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:20:29.150+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:20:29.149+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:20:29.174+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:20:29.173+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:20:29.175+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:20:29.195+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.059 seconds
+[2025-09-11T09:20:47.339+0000] {processor.py:157} INFO - Started process (PID=1659) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:20:47.342+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:20:47.345+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:20:47.345+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:20:47.365+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:20:47.364+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:20:47.366+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:20:47.385+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.052 seconds
+[2025-09-11T09:21:26.624+0000] {processor.py:157} INFO - Started process (PID=165) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:21:26.626+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:21:26.628+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:21:26.628+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:21:26.652+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:21:26.651+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:21:26.653+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:21:26.668+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.045 seconds
+[2025-09-11T09:21:57.004+0000] {processor.py:157} INFO - Started process (PID=191) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:21:57.005+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:21:57.008+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:21:57.008+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:21:57.035+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:21:57.034+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:21:57.035+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:21:57.050+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.053 seconds
+[2025-09-11T09:22:05.336+0000] {processor.py:157} INFO - Started process (PID=196) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:22:05.341+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:22:05.349+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:22:05.349+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:22:05.421+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:22:05.411+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 9, in <module>
+    import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:22:05.424+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:22:05.457+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.132 seconds
+[2025-09-11T09:22:31.642+0000] {processor.py:157} INFO - Started process (PID=222) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:22:31.644+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:22:31.645+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:22:31.644+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:22:31.662+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:22:31.659+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:22:31.662+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:22:31.680+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.044 seconds
+[2025-09-11T09:23:01.946+0000] {processor.py:157} INFO - Started process (PID=248) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:23:01.948+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:23:01.949+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:23:01.949+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:23:01.965+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:23:01.963+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:23:01.965+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:23:01.982+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.041 seconds
+[2025-09-11T09:23:32.289+0000] {processor.py:157} INFO - Started process (PID=267) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:23:32.291+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:23:32.292+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:23:32.291+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:23:32.305+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:23:32.304+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:23:32.305+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:23:32.319+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.034 seconds
+[2025-09-11T09:24:02.618+0000] {processor.py:157} INFO - Started process (PID=293) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:24:02.621+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:24:02.623+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:24:02.622+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:24:02.642+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:24:02.639+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:24:02.642+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:24:02.672+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.060 seconds
+[2025-09-11T09:24:33.146+0000] {processor.py:157} INFO - Started process (PID=319) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:24:33.148+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:24:33.148+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:24:33.148+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:24:33.156+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:24:33.155+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:24:33.156+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:24:33.166+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.022 seconds
+[2025-09-11T09:25:03.480+0000] {processor.py:157} INFO - Started process (PID=345) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:03.481+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:25:03.483+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:25:03.482+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:03.495+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:25:03.493+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:25:03.495+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:03.516+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.048 seconds
+[2025-09-11T09:25:33.988+0000] {processor.py:157} INFO - Started process (PID=371) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:33.991+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:25:34.004+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:25:33.993+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:34.036+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:25:34.029+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:25:34.037+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:34.056+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.100 seconds
+[2025-09-11T09:25:51.429+0000] {processor.py:157} INFO - Started process (PID=165) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:51.430+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:25:51.431+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:25:51.431+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:51.449+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:25:51.447+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:25:51.449+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:25:51.461+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.036 seconds
+[2025-09-11T09:26:22.028+0000] {processor.py:157} INFO - Started process (PID=191) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:26:22.030+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:26:22.031+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:26:22.030+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:26:22.048+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:26:22.046+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:26:22.048+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:26:22.063+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.040 seconds
+[2025-09-11T09:26:52.352+0000] {processor.py:157} INFO - Started process (PID=217) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:26:52.353+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:26:52.353+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:26:52.353+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:26:52.362+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:26:52.361+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:26:52.363+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:26:52.374+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.026 seconds
+[2025-09-11T09:27:22.694+0000] {processor.py:157} INFO - Started process (PID=236) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:27:22.695+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:27:22.696+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:27:22.696+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:27:22.722+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:27:22.720+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:27:22.723+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:27:22.768+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.083 seconds
+[2025-09-11T09:27:53.048+0000] {processor.py:157} INFO - Started process (PID=262) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:27:53.050+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:27:53.052+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:27:53.051+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:27:53.065+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:27:53.063+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:27:53.065+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:27:53.081+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.042 seconds
+[2025-09-11T09:28:47.025+0000] {processor.py:157} INFO - Started process (PID=164) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:28:47.027+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:28:47.028+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:28:47.028+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:28:47.049+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:28:47.047+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:28:47.049+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:28:47.063+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.043 seconds
+[2025-09-11T09:29:17.323+0000] {processor.py:157} INFO - Started process (PID=191) to work on /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:29:17.324+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/financial_data_dag.py for tasks to queue
+[2025-09-11T09:29:17.324+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:29:17.324+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:29:17.340+0000] {logging_mixin.py:151} INFO - [2025-09-11T09:29:17.337+0000] {dagbag.py:347} ERROR - Failed to import: /opt/airflow/dags/financial_data_dag.py
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.9/site-packages/airflow/models/dagbag.py", line 343, in parse
+    loader.exec_module(new_module)
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/opt/airflow/dags/financial_data_dag.py", line 10, in <module>
+    from etl import etl_script
+  File "/opt/airflow/etl/etl_script.py", line 1, in <module>
+    import finnhub
+ModuleNotFoundError: No module named 'finnhub'
+[2025-09-11T09:29:17.341+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/financial_data_dag.py
+[2025-09-11T09:29:17.360+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/financial_data_dag.py took 0.040 seconds
