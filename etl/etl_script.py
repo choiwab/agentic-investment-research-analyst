@@ -1,10 +1,14 @@
-import finnhub
-from pymongo import MongoClient
-import time
-import random
-from bson.int64 import Int64
-from datetime import date, timedelta
 import os
+import random
+import time
+from datetime import date, timedelta
+
+import finnhub
+from bson.int64 import Int64
+from dotenv import load_dotenv
+from pymongo import MongoClient
+
+load_dotenv()
 
 # client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
 # db = client["test"]
@@ -19,7 +23,12 @@ def get_mongo_client():
 # Replace the existing client initialization
 client = get_mongo_client()
 db = client["test"]
-finnhub_client = finnhub.Client(api_key="d2pjmthr01qnf9nlcku0d2pjmthr01qnf9nlckug")
+
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
+if not FINNHUB_API_KEY:
+    raise RuntimeError("FINNHUB_API_KEY is not set. Add it to your .env or environment.")
+
+finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 
 # ---- EXTRACT ----
 def extract_symbols(exchange="US"):
