@@ -2,3 +2,14 @@ langchain == 0.3.27
 langchain_ollama == 0.3.7
 langgraph == 0.6.7
 
+fastapi
+uvicorn
+requests
+beautifulsoup4
+pymongo
+langchain
+huggingface-hub
+transformers
+streamlit
+finnhub-python
+python-dotenv
