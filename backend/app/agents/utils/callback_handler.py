@@ -1,6 +1,7 @@
 from langchain.callbacks.base import BaseCallbackHandler
 
 class PrintCallbackHandler(BaseCallbackHandler):
+    """Callback Handler to stream token-level output"""
     def __init__(self):
         self.tokens = []
     def on_llm_new_token(self, token: str, **kwargs):
