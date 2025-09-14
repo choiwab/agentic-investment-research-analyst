@@ -261,7 +261,6 @@ def run_pipeline(exchange="US", max_symbols=5):
         # companies
         profile = transform_company_profile(extract_company_profile(ticker))
         if profile:
-            print(f"Upserting company profile: {profile}")
             db.companies.update_one({"_id": profile["_id"]}, {"$set": profile}, upsert=True)
 
         # earnings
