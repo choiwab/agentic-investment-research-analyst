@@ -15,6 +15,8 @@ if not FINNHUB_API_KEY:
     raise RuntimeError("FINNHUB_API_KEY is not set. Add it to your .env or environment.")
 
 ATLAS_URI = os.getenv("ATLAS_URI")
+if not ATLAS_URI:
+    raise RuntimeError("ATLAS_URI is not set. Add it to your .env or environment.")
 finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 
 # client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
