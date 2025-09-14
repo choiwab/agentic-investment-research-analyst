@@ -10,25 +10,30 @@ from pymongo import MongoClient
 
 load_dotenv()
 
-# client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
-# db = client["test"]
-def get_mongo_client():
-    if os.getenv('AIRFLOW__CORE__EXECUTOR'):
-        # Use Docker service name
-        return MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
-    else:
-        # Use localhost for local development
-        return MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
-
-# Replace the existing client initialization
-client = get_mongo_client()
-db = client["test"]
-
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 if not FINNHUB_API_KEY:
     raise RuntimeError("FINNHUB_API_KEY is not set. Add it to your .env or environment.")
 
+ATLAS_URI = os.getenv("ATLAS_URI")
+if not ATLAS_URI:
+    raise RuntimeError("ATLAS_URI is not set. Add it to your .env or environment.")
 finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
+
+# client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
+# db = client["test"]
+def get_mongo_client():
+    return MongoClient(ATLAS_URI)
+    # Uncomment below to use different connection strings based on environment
+    # if os.getenv('AIRFLOW__CORE__EXECUTOR'):
+    #     # Use Docker service name
+    #     return MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
+    # else:
+    #     # Use localhost for local development
+    #     return MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
+
+# Replace the existing client initialization
+client = get_mongo_client()
+db = client["test"]
 
 # ---- EXTRACT ----
 def extract_symbols(exchange="US"):
