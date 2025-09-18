@@ -2,14 +2,16 @@ import os
 import re
 import time
 from typing import Dict, List
-
+from dotenv import load_dotenv
 import yfinance as yf
 from pymongo import MongoClient
+import certifi
 
 
 class SECRiskAnalyzer:
 
     def __init__(self):
+        load_dotenv()
         self.risk_keywords = {
             'market_risk': [
                 'market volatility', 'economic downturn', 'recession', 'inflation',
@@ -40,13 +42,26 @@ class SECRiskAnalyzer:
         }
         self.mongo_client = None
         self.mongo_db = None
-        mongo_uri = os.getenv('ATLAS_URI', 'mongodb://localhost:27017')
+        mongo_uri = os.getenv('ATLAS_URI')
         mongo_db_name = os.getenv('MONGODB_DB', 'test')
+
+        if not mongo_uri:
+            print("ATLAS_URI not set. Create a .env file and add it in")
         try:
-            self.mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=1500)
+            # SRV needs dnspython: pip install "pymongo[srv]"
+            self.mongo_client = MongoClient(
+            mongo_uri,
+            tlsCAFile=certifi.where(),          # <-- keep this
+            serverSelectionTimeoutMS=20000
+            )
+            # Force a connection attempt + show where we connected
+            self.mongo_client.admin.command("ping")
+            info = self.mongo_client.server_info()
+            print(f"[SEC-Risk] Connected to MongoDB {info.get('version','?')}")
             self.mongo_db = self.mongo_client[mongo_db_name]
-            self.mongo_client.admin.command('ping')
-        except Exception:
+            print(f"[SEC-Risk] Using database: {self.mongo_db.name}")
+        except Exception as e:
+            print(f"[SEC-Risk] Mongo connection failed: {e}")
             self.mongo_client = None
             self.mongo_db = None
         
@@ -126,34 +141,78 @@ class SECRiskAnalyzer:
                 
         return adjusted_scores
 
-    def _get_financial_metrics_from_db(self, ticker: str) -> Dict:
-        """Fetch financial metrics from MongoDB collections if available.
-
-        Sources:
-        - basic_financials.metric: debtToEquity, currentRatio, profitMargins
-        Fallbacks: return {} if not found or DB unavailable.
-        """
-        if not self.mongo_db:
+    def _get_financial_metrics_from_db(self, ticker: str) -> dict:
+        if self.mongo_db is None:
+            print("[SEC-Risk] No DB handle (connect failed).")
             return {}
 
         try:
-            doc = self.mongo_db['basic_financials'].find_one({ 'ticker': ticker })
+            col = self.mongo_db['basic_financials']
+            doc = col.find_one({'ticker': ticker}) or col.find_one({'_id': ticker})
             if not doc:
+                print(f"[SEC-Risk] No basic_financials doc for {ticker}.")
                 return {}
 
-            metric = doc.get('metric', {}) or {}
-            # Align keys with our analyzer's expectations
-            metrics = {
-                'debt_to_equity': (metric.get('debtToEquity') / 100) if metric.get('debtToEquity') is not None else None,
-                'current_ratio': metric.get('currentRatio'),
-                'profit_margin': metric.get('profitMargins'),
-                'beta': metric.get('beta'),
-                'pe_ratio': metric.get('trailingPE') or metric.get('peBasicExclExtraTTM')
+            metric = (doc.get('metric') or {})
+            if not metric:
+                print(f"[SEC-Risk] Doc found for {ticker} but 'metric' is empty.")
+                return {}
+
+            # Simple percent→ratio normalization: if abs(val) > 5, treat as %.
+            debt_to_equity = (
+                metric.get('totalDebt/totalEquityQuarterly')
+                if metric.get('totalDebt/totalEquityQuarterly') is not None
+                else metric.get('totalDebt/totalEquityAnnual')
+            )
+            if debt_to_equity is None:
+                debt_to_equity = (
+                    metric.get('longTermDebt/equityQuarterly')
+                    if metric.get('longTermDebt/equityQuarterly') is not None
+                    else metric.get('longTermDebt/equityAnnual')
+                )
+            if debt_to_equity is not None and abs(debt_to_equity) > 5:
+                debt_to_equity = debt_to_equity / 100.0
+
+            current_ratio = (
+                metric.get('currentRatioQuarterly')
+                if metric.get('currentRatioQuarterly') is not None
+                else metric.get('currentRatioAnnual')
+            )
+
+            profit_margin = (
+                metric.get('netProfitMarginTTM')
+                if metric.get('netProfitMarginTTM') is not None
+                else metric.get('netProfitMarginAnnual')
+            )
+            if profit_margin is not None and abs(profit_margin) > 5:
+                profit_margin = profit_margin / 100.0
+
+            beta = metric.get('beta')
+
+            pe_ratio = (
+                metric.get('peTTM')
+                or metric.get('peInclExtraTTM')
+                or metric.get('peExclExtraTTM')
+                or metric.get('peAnnual')
+                or metric.get('trailingPE')
+                or metric.get('peBasicExclExtraTTM')
+            )
+
+            out = {
+                'debt_to_equity': debt_to_equity,
+                'current_ratio': current_ratio,
+                'profit_margin': profit_margin,
+                'beta': beta,
+                'pe_ratio': pe_ratio
             }
-            return { k: v for k, v in metrics.items() if v is not None }
-        except Exception:
+
+            # return only populated keys
+            return {k: v for k, v in out.items() if v is not None}
+
+        except Exception as e:
+            print(f"[SEC-Risk] Query error: {e}")
             return {}
-    
+        
     def get_financial_metrics(self, ticker: str) -> Dict:
         """Fetch basic financial metrics, preferring MongoDB then falling back to yfinance."""
 
@@ -162,7 +221,8 @@ class SECRiskAnalyzer:
         if metrics:
             return metrics
         print("Mongodb doesnt work")
-
+        
+    
         # 2) Fallback to yfinance with retry/backoff and safe fallbacks
         delays = [1, 3, 6]
         last_error = None
@@ -225,7 +285,7 @@ class SECRiskAnalyzer:
 
 if __name__ == "__main__":
     # Basic manual test for SECRiskAnalyzer with MongoDB preference
-    ticker = "AAPL"
+    ticker = "AAPJ"
     sample_text = (
         "Apple reported strong revenue growth but highlighted supply chain risks and regulatory scrutiny. "
         "Management noted rising input costs and potential demand fluctuations in key markets."
@@ -236,7 +296,7 @@ if __name__ == "__main__":
 
     atlas_uri = os.getenv('ATLAS_URI', 'mongodb://localhost:27017')
     mongo_db_name = os.getenv('MONGODB_DB', 'test')
-    print(f"ATLAS_URI: {atlas_uri}")
+    # print(f"ATLAS_URI: {atlas_uri}")
     print(f"MONGODB_DB: {mongo_db_name}")
 
     # Check DB metrics availability
