@@ -7,6 +7,8 @@ import finnhub
 from bson.int64 import Int64
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 load_dotenv()
 
@@ -22,14 +24,15 @@ finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 # client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
 # db = client["test"]
 def get_mongo_client():
-    return MongoClient(ATLAS_URI)
-    # Uncomment below to use different connection strings based on environment
-    # if os.getenv('AIRFLOW__CORE__EXECUTOR'):
-    #     # Use Docker service name
-    #     return MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
-    # else:
-    #     # Use localhost for local development
-    #     return MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
+    # Create a new client and connect to the server
+    client = MongoClient(ATLAS_URI, server_api=ServerApi('1'))
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+        return client
+    except Exception as e:
+        print(e)
 
 # Replace the existing client initialization
 client = get_mongo_client()
