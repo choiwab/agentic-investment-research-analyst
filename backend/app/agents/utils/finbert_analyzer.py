@@ -132,6 +132,8 @@ class FinBERTAnalyzer:
                 all_probabilities.append(predictions_np)
             
             avg_probabilities = np.mean(all_probabilities, axis=0)
+            # Convert to native Python types for serialization
+            avg_probabilities = avg_probabilities.astype(float)
             
             sentiment_probs = {}
             for idx, label in self.label_mapping.items():
