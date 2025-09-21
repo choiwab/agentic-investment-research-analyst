@@ -664,19 +664,14 @@ if __name__ == "__main__":
     agent = SentimentAgent(model="llama3.1")
     
     sample_text = """
-    Apple Inc. reported strong quarterly earnings, beating analyst expectations with revenue growth of 8% year-over-year. 
-    The company's iPhone sales showed resilience despite market headwinds, while services revenue continued to expand. 
-    However, management highlighted ongoing supply chain challenges and regulatory scrutiny in key markets. 
-    The company faces increasing competition in the smartphone space and potential regulatory changes that could impact 
-    its App Store revenue model. Despite these challenges, Apple's strong balance sheet and cash position provide 
-    significant flexibility for future investments and shareholder returns.
+    Orian Sh.M. Ltd delivered stable operational performance in Q2 2025 despite continued market volatility in energy prices. Revenue grew modestly, supported by strong offshore wind output, though profitability was impacted by higher financing costs and ongoing project delays in the U.S. portfolio. The company remains on track with its long-term renewable capacity expansion goals.
     """
     
-    results = agent.run(text=sample_text, ticker="ORSHF", thread_id="apple_analysis_thread")
+    results = agent.run(text=sample_text, ticker="ORSHF", thread_id="analysis_thread")
     
     print(json.dumps(results, indent=2))
     
     print("\n--- Analysis History ---\n")
-    history = agent.get_analysis_history(thread_id="apple_analysis_thread")
+    history = agent.get_analysis_history(thread_id="analysis_thread")
     for msg in history:
         print(f"[{msg.type.upper()}]: {msg.content}\n")
