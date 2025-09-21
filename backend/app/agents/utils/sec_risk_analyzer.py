@@ -1,12 +1,9 @@
 import os
 import re
-import time
 from typing import Dict, List
 from dotenv import load_dotenv
-import yfinance as yf
 from pymongo import MongoClient
 import certifi
-
 
 class SECRiskAnalyzer:
 
@@ -15,29 +12,28 @@ class SECRiskAnalyzer:
         self.risk_keywords = {
             'market_risk': [
                 'market volatility', 'economic downturn', 'recession', 'inflation',
-                'interest rate', 'currency fluctuation', 'commodity price',
-                'market competition', 'demand fluctuation', 'supply chain'
+                'interest rate', 'currency', 'commodity price', 'competition',
+                'demand', 'supply chain'
             ],
             'operational_risk': [
                 'operational failure', 'system failure', 'cybersecurity',
-                'data breach', 'regulatory compliance', 'key personnel',
-                'technology disruption', 'manufacturing', 'quality control',
-                'supply chain disruption'
+                'data breach', 'key personnel', 'technology disruption',
+                'manufacturing', 'quality control', 'supply chain'
             ],
             'financial_risk': [
                 'liquidity', 'credit risk', 'debt', 'cash flow',
                 'working capital', 'covenant', 'bankruptcy', 'insolvency',
-                'financial leverage', 'capital requirements'
+                'leverage', 'capital'
             ],
             'regulatory_risk': [
-                'regulatory change', 'compliance', 'government regulation',
-                'tax law', 'environmental regulation', 'safety regulation',
-                'licensing', 'permit', 'legal proceeding', 'litigation'
+                'regulatory', 'compliance', 'government regulation', 'law',
+                'environmental regulation', 'safety regulation', 'licensing',
+                'permit', 'legal', 'litigation', 'scrutiny'
             ],
             'strategic_risk': [
-                'strategic initiative', 'merger', 'acquisition', 'divestiture',
+                'strategic', 'merger', 'acquisition', 'divestiture',
                 'market expansion', 'product development', 'innovation',
-                'competitive position', 'brand reputation', 'customer concentration'
+                'competitive position', 'reputation', 'customer concentration'
             ]
         }
         self.mongo_client = None
@@ -48,13 +44,11 @@ class SECRiskAnalyzer:
         if not mongo_uri:
             print("ATLAS_URI not set. Create a .env file and add it in")
         try:
-            # SRV needs dnspython: pip install "pymongo[srv]"
             self.mongo_client = MongoClient(
             mongo_uri,
-            tlsCAFile=certifi.where(),          # <-- keep this
+            tlsCAFile=certifi.where(),
             serverSelectionTimeoutMS=20000
             )
-            # Force a connection attempt + show where we connected
             self.mongo_client.admin.command("ping")
             info = self.mongo_client.server_info()
             print(f"[SEC-Risk] Connected to MongoDB {info.get('version','?')}")
@@ -66,39 +60,35 @@ class SECRiskAnalyzer:
             self.mongo_db = None
         
     def extract_risk_factors(self, text: str) -> Dict[str, List[str]]:
-        """Extract risk factors from text using keyword matching"""
         text_lower = text.lower()
         identified_risks = {}
         
         for risk_category, keywords in self.risk_keywords.items():
-            found_risks = []
+            found_risks = set()
             for keyword in keywords:
                 if keyword in text_lower:
-                    # Extract sentence containing the keyword
                     sentences = re.split(r'[.!?]+', text)
                     for sentence in sentences:
                         if keyword in sentence.lower():
-                            found_risks.append(sentence.strip())
-                            break
-            identified_risks[risk_category] = found_risks
+                            found_risks.add(sentence.strip())
+            identified_risks[risk_category] = list(found_risks)
             
         return identified_risks
     
     def calculate_risk_score(self, risk_factors: Dict[str, List[str]], 
                            financial_metrics: Dict = None) -> Dict[str, float]:
-        """Calculate risk scores based on identified factors and financial metrics"""
         risk_scores = {}
         
-        # Base risk calculation from text analysis
         for category, factors in risk_factors.items():
-            base_score = min(len(factors) * 0.1, 1.0)  # Cap at 1.0
-            risk_scores[category] = base_score
-            
-        # Adjust scores based on financial metrics if available
+            if len(factors) > 0:
+                score = 0.15 + (len(factors) - 1) * 0.05
+                risk_scores[category] = min(score, 1.0)
+            else:
+                risk_scores[category] = 0.0
+
         if financial_metrics:
             risk_scores = self._adjust_for_financial_metrics(risk_scores, financial_metrics)
             
-        # Calculate overall risk score
         category_weights = {
             'market_risk': 0.25,
             'operational_risk': 0.20,
@@ -117,27 +107,37 @@ class SECRiskAnalyzer:
     
     def _adjust_for_financial_metrics(self, risk_scores: Dict[str, float], 
                                     metrics: Dict) -> Dict[str, float]:
-        """Adjust risk scores based on financial health indicators"""
         adjusted_scores = risk_scores.copy()
+        financial_multiplier = 1.0
+        operational_multiplier = 1.0
+
+        if metrics.get('debt_to_equity', 0) > 2.5:
+            financial_multiplier += 0.5
+        elif metrics.get('debt_to_equity', 0) > 1.5:
+            financial_multiplier += 0.2
+
+        if metrics.get('current_ratio', 2.0) < 1.0:
+            financial_multiplier += 0.4
+        elif metrics.get('current_ratio', 2.0) < 1.5:
+            financial_multiplier += 0.15
         
-        # Debt-to-equity ratio adjustment
-        if 'debt_to_equity' in metrics:
-            debt_ratio = metrics['debt_to_equity']
-            if debt_ratio > 2.0:  # High leverage
-                adjusted_scores['financial_risk'] = min(adjusted_scores.get('financial_risk', 0) + 0.3, 1.0)
-            elif debt_ratio > 1.0:
-                adjusted_scores['financial_risk'] = min(adjusted_scores.get('financial_risk', 0) + 0.1, 1.0)
-                
-        # Current ratio adjustment
-        if 'current_ratio' in metrics:
-            current_ratio = metrics['current_ratio']
-            if current_ratio < 1.0:  # Liquidity concerns
-                adjusted_scores['financial_risk'] = min(adjusted_scores.get('financial_risk', 0) + 0.2, 1.0)
-                
-        if 'profit_margin' in metrics:
-            margin = metrics['profit_margin']
-            if margin < 0:  # Negative margins
-                adjusted_scores['operational_risk'] = min(adjusted_scores.get('operational_risk', 0) + 0.2, 1.0)
+        if metrics.get('profit_margin', 0.1) < 0:
+            operational_multiplier += 0.5
+        elif metrics.get('profit_margin', 0.1) < 0.05:
+            operational_multiplier += 0.2
+
+        if adjusted_scores.get('financial_risk', 0) > 0:
+            adjusted_scores['financial_risk'] *= financial_multiplier
+        else:
+             adjusted_scores['financial_risk'] += (financial_multiplier - 1.0) * 0.2
+        
+        if adjusted_scores.get('operational_risk', 0) > 0:
+            adjusted_scores['operational_risk'] *= operational_multiplier
+        else:
+            adjusted_scores['operational_risk'] += (operational_multiplier - 1.0) * 0.2
+
+        for category in adjusted_scores:
+            adjusted_scores[category] = min(adjusted_scores[category], 1.0)
                 
         return adjusted_scores
 
@@ -158,7 +158,6 @@ class SECRiskAnalyzer:
                 print(f"[SEC-Risk] Doc found for {ticker} but 'metric' is empty.")
                 return {}
 
-            # Simple percent→ratio normalization: if abs(val) > 5, treat as %.
             debt_to_equity = (
                 metric.get('totalDebt/totalEquityQuarterly')
                 if metric.get('totalDebt/totalEquityQuarterly') is not None
@@ -206,7 +205,6 @@ class SECRiskAnalyzer:
                 'pe_ratio': pe_ratio
             }
 
-            # return only populated keys
             return {k: v for k, v in out.items() if v is not None}
 
         except Exception as e:
@@ -214,66 +212,20 @@ class SECRiskAnalyzer:
             return {}
         
     def get_financial_metrics(self, ticker: str) -> Dict:
-        """Fetch basic financial metrics, preferring MongoDB then falling back to yfinance."""
-
-        # 1) Try MongoDB first
         metrics = self._get_financial_metrics_from_db(ticker)
         if metrics:
             return metrics
-        print("Mongodb doesnt work")
         
-    
-        # 2) Fallback to yfinance with retry/backoff and safe fallbacks
-        delays = [1, 3, 6]
-        last_error = None
-        for attempt, delay in enumerate(delays, start=1):
-            try:
-                stock = yf.Ticker(ticker)
-                info = stock.info
-                yf_metrics = {
-                    'debt_to_equity': (info.get('debtToEquity', 0) / 100) if info.get('debtToEquity') else None,
-                    'current_ratio': info.get('currentRatio', None),
-                    'profit_margin': info.get('profitMargins', None),
-                    'beta': info.get('beta', None),
-                    'pe_ratio': info.get('trailingPE', None)
-                }
-                cleaned = { k: v for k, v in yf_metrics.items() if v is not None }
-                if cleaned:
-                    return cleaned
-            except Exception as e:
-                last_error = e
-                message = str(e)
-                if '429' in message or 'Too Many Requests' in message:
-                    time.sleep(delay * 2)
-                else:
-                    time.sleep(delay)
-        try:
-            stock = yf.Ticker(ticker)
-            fast = getattr(stock, 'fast_info', None)
-            if fast:
-                yf_fast_metrics = {
-                    'beta': getattr(fast, 'beta', None),
-                    'pe_ratio': getattr(fast, 'trailing_pe', None)
-                }
-                cleaned = { k: v for k, v in yf_fast_metrics.items() if v is not None }
-                if cleaned:
-                    return cleaned
-        except Exception as e:
-            last_error = e
-        print(f"Error fetching financial metrics for {ticker}: {last_error}")
+        print(f"No financial metrics found in the database for {ticker}. Returning empty.")
         return {}
     
     def analyze_comprehensive_risk(self, text: str, ticker: str = None) -> Dict:
-        """Perform comprehensive risk analysis combining text and financial data"""
-        # Extract risk factors from text
         risk_factors = self.extract_risk_factors(text)
         
-        # Get financial metrics if ticker provided
         financial_metrics = {}
         if ticker:
             financial_metrics = self.get_financial_metrics(ticker)
             
-        # Calculate risk scores
         risk_scores = self.calculate_risk_score(risk_factors, financial_metrics)
         
         return {
@@ -284,10 +236,9 @@ class SECRiskAnalyzer:
 
 
 if __name__ == "__main__":
-    # Basic manual test for SECRiskAnalyzer with MongoDB preference
-    ticker = "AAPJ"
+    ticker = "ORSHF"
     sample_text = (
-        "Apple reported strong revenue growth but highlighted supply chain risks and regulatory scrutiny. "
+        "ORSHF reported strong revenue growth but highlighted supply chain risks and regulatory scrutiny. "
         "Management noted rising input costs and potential demand fluctuations in key markets."
     )
 
@@ -296,14 +247,12 @@ if __name__ == "__main__":
 
     atlas_uri = os.getenv('ATLAS_URI', 'mongodb://localhost:27017')
     mongo_db_name = os.getenv('MONGODB_DB', 'test')
-    # print(f"ATLAS_URI: {atlas_uri}")
     print(f"MONGODB_DB: {mongo_db_name}")
 
-    # Check DB metrics availability
     try:
         db_metrics = analyzer._get_financial_metrics_from_db(ticker)
-        source = "MongoDB" if db_metrics else "yfinance/fallback"
-        print(f"Financial metrics source (intended): {source}")
+        source = "MongoDB" if db_metrics else "Not Found"
+        print(f"Financial metrics source: {source}")
         if db_metrics:
             print(f"Sample DB metrics: { {k: db_metrics[k] for k in list(db_metrics)[:4]} }")
     except Exception as e:
