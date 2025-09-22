@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from typing import Optional, List
 import os
 
 load_dotenv()
@@ -9,11 +10,12 @@ ATLAS_URI = os.getenv("ATLAS_URI")
 client = MongoClient(ATLAS_URI)
 db = client["test"]
 
-app = FastAPI()
+app = FastAPI(title="Investment Research API", version="1.0.0")
 
+# ===== COMPANIES =====
 @app.get("/companies")
 def get_companies():
-    # Project _id as ticker in the response
+    """Get all companies"""
     companies = []
     for doc in db.companies.find({}, {}):
         company = dict(doc)
@@ -23,16 +25,274 @@ def get_companies():
 
 @app.get("/company/{ticker}")
 def get_company(ticker: str):
-    company = db.companies.find_one({"_id": ticker}, {"_id": 0})
+    """Get company by ticker"""
+    company = db.companies.find_one({"_id": ticker})
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
+    company["ticker"] = company.pop("_id")
     return company
 
 @app.post("/company/")
 def add_company(company: dict):
+    """Add a new company"""
     if "_id" not in company:
         raise HTTPException(status_code=400, detail="Company must have a ticker (_id)")
     if db.companies.find_one({"_id": company["_id"]}):
         raise HTTPException(status_code=400, detail="Company with this ticker already exists")
     db.companies.insert_one(company)
     return {"message": "Company added successfully"}
+
+# ===== EARNINGS REPORTS =====
+@app.get("/earnings/{ticker}")
+def get_earnings_reports(ticker: str, year: Optional[int] = None, quarter: Optional[int] = None):
+    """Get earnings reports for a ticker, optionally filtered by year/quarter"""
+    query = {"ticker": ticker}
+    if year:
+        query["year"] = year
+    if quarter:
+        query["quarter"] = quarter
+    
+    earnings = list(db.earnings_reports.find(query, {"_id": 0}))
+    if not earnings:
+        raise HTTPException(status_code=404, detail="No earnings reports found")
+    return {"earnings": earnings}
+
+@app.get("/earnings")
+def get_all_earnings(year: Optional[int] = None, quarter: Optional[int] = None):
+    """Get all earnings reports, optionally filtered by year/quarter"""
+    query = {}
+    if year:
+        query["year"] = year
+    if quarter:
+        query["quarter"] = quarter
+    
+    earnings = list(db.earnings_reports.find(query, {"_id": 0}))
+    return {"earnings": earnings}
+
+# ===== NEWS =====
+@app.get("/news/{ticker}")
+def get_news(ticker: str, limit: int = Query(10, le=100)):
+    """Get news for a ticker"""
+    news = list(db.news.find({"ticker": ticker}, {"_id": 0}).sort("datetime", -1).limit(limit))
+    if not news:
+        raise HTTPException(status_code=404, detail="No news found for this ticker")
+    return {"news": news}
+
+@app.get("/news")
+def get_all_news(limit: int = Query(50, le=1000)):
+    """Get latest news across all tickers"""
+    news = list(db.news.find({}, {"_id": 0}).sort("datetime", -1).limit(limit))
+    return {"news": news}
+
+@app.get("/news/by-id/{news_id}")
+def get_news_by_id(news_id: int, ticker: str):
+    """Get specific news item by ID and ticker"""
+    news_item = db.news.find_one({"id": news_id, "ticker": ticker}, {"_id": 0})
+    if not news_item:
+        raise HTTPException(status_code=404, detail="News item not found")
+    return news_item
+
+# ===== SEC FILINGS =====
+@app.get("/filings/{ticker}")
+def get_sec_filings(ticker: str, form: Optional[str] = None):
+    """Get SEC filings for a ticker, optionally filtered by form type"""
+    query = {"ticker": ticker}
+    if form:
+        query["form"] = form
+    
+    filings = list(db.sec_fillings.find(query, {"_id": 0}).sort("filedDate", -1))
+    if not filings:
+        raise HTTPException(status_code=404, detail="No SEC filings found")
+    return {"filings": filings}
+
+@app.get("/filings/access/{access_number}")
+def get_filing_by_access(access_number: str):
+    """Get SEC filing by access number"""
+    filing = db.sec_fillings.find_one({"accessNumber": access_number}, {"_id": 0})
+    if not filing:
+        raise HTTPException(status_code=404, detail="Filing not found")
+    return filing
+
+# ===== MARKET DATA =====
+@app.get("/market-data/{ticker}")
+def get_market_data(ticker: str):
+    """Get latest market data for a ticker"""
+    market_data = db.market_data.find_one({"ticker": ticker}, {"_id": 0}, sort=[("t", -1)])
+    if not market_data:
+        raise HTTPException(status_code=404, detail="No market data found")
+    return market_data
+
+@app.get("/market-data")
+def get_all_market_data(limit: int = Query(100, le=1000)):
+    """Get latest market data for all tickers"""
+    pipeline = [
+        {"$sort": {"ticker": 1, "t": -1}},
+        {"$group": {
+            "_id": "$ticker",
+            "latest": {"$first": "$$ROOT"}
+        }},
+        {"$replaceRoot": {"newRoot": "$latest"}},
+        {"$project": {"_id": 0}},
+        {"$limit": limit}
+    ]
+    
+    market_data = list(db.market_data.aggregate(pipeline))
+    return {"market_data": market_data}
+
+# ===== EARNINGS SURPRISES =====
+@app.get("/earnings-surprises/{ticker}")
+def get_earnings_surprises(ticker: str, year: Optional[int] = None):
+    """Get earnings surprises for a ticker"""
+    query = {"ticker": ticker}
+    if year:
+        query["year"] = year
+    
+    surprises = list(db.earnings_surprises.find(query, {"_id": 0}).sort([("year", -1), ("quarter", -1)]))
+    if not surprises:
+        raise HTTPException(status_code=404, detail="No earnings surprises found")
+    return {"earnings_surprises": surprises}
+
+@app.get("/earnings-surprises")
+def get_all_earnings_surprises(year: Optional[int] = None, quarter: Optional[int] = None):
+    """Get earnings surprises for all tickers"""
+    query = {}
+    if year:
+        query["year"] = year
+    if quarter:
+        query["quarter"] = quarter
+    
+    surprises = list(db.earnings_surprises.find(query, {"_id": 0}).sort([("year", -1), ("quarter", -1)]))
+    return {"earnings_surprises": surprises}
+
+# ===== FINANCIALS REPORTED =====
+@app.get("/financials-reported/{ticker}")
+def get_financials_reported(ticker: str, form: Optional[str] = None, year: Optional[int] = None):
+    """Get reported financials for a ticker"""
+    query = {"ticker": ticker}
+    if form:
+        query["form"] = form
+    if year:
+        query["year"] = year
+    
+    financials = list(db.financials_reported.find(query, {"_id": 0}).sort("filedDate", -1))
+    if not financials:
+        raise HTTPException(status_code=404, detail="No reported financials found")
+    return {"financials_reported": financials}
+
+@app.get("/financials-reported/access/{access_number}")
+def get_financial_by_access(access_number: str):
+    """Get reported financial by access number"""
+    financial = db.financials_reported.find_one({"accessNumber": access_number}, {"_id": 0})
+    if not financial:
+        raise HTTPException(status_code=404, detail="Financial report not found")
+    return financial
+
+# ===== INSIDER SENTIMENT =====
+@app.get("/insider-sentiment/{ticker}")
+def get_insider_sentiment(ticker: str, year: Optional[int] = None, month: Optional[int] = None):
+    """Get insider sentiment for a ticker"""
+    query = {"ticker": ticker}
+    if year:
+        query["year"] = year
+    if month:
+        query["month"] = month
+    
+    sentiment = list(db.insider_sentiment.find(query, {"_id": 0}).sort([("year", -1), ("month", -1)]))
+    if not sentiment:
+        raise HTTPException(status_code=404, detail="No insider sentiment data found")
+    return {"insider_sentiment": sentiment}
+
+@app.get("/insider-sentiment")
+def get_all_insider_sentiment(year: Optional[int] = None, limit: int = Query(100, le=1000)):
+    """Get insider sentiment for all tickers"""
+    query = {}
+    if year:
+        query["year"] = year
+    
+    sentiment = list(db.insider_sentiment.find(query, {"_id": 0}).sort([("year", -1), ("month", -1)]).limit(limit))
+    return {"insider_sentiment": sentiment}
+
+# ===== BASIC FINANCIALS =====
+@app.get("/basic-financials/{ticker}")
+def get_basic_financials(ticker: str):
+    """Get basic financials for a ticker"""
+    financials = db.basic_financials.find_one({"_id": ticker})
+    if not financials:
+        raise HTTPException(status_code=404, detail="No basic financials found")
+    
+    financials["ticker"] = financials.pop("_id")
+    return financials
+
+@app.get("/basic-financials")
+def get_all_basic_financials():
+    """Get basic financials for all tickers"""
+    financials = []
+    for doc in db.basic_financials.find({}):
+        financial = dict(doc)
+        financial["ticker"] = financial.pop("_id")
+        financials.append(financial)
+    return {"basic_financials": financials}
+
+# ===== UTILITY ENDPOINTS =====
+@app.get("/tickers")
+def get_all_tickers():
+    """Get list of all available tickers"""
+    tickers = db.companies.distinct("_id")
+    return {"tickers": sorted(tickers)}
+
+@app.get("/ticker-summary/{ticker}")
+def get_ticker_summary(ticker: str):
+    """Get comprehensive summary for a ticker"""
+    # Check if ticker exists
+    company = db.companies.find_one({"_id": ticker})
+    if not company:
+        raise HTTPException(status_code=404, detail="Ticker not found")
+    
+    company["ticker"] = company.pop("_id")
+    
+    # Get latest data from each collection
+    summary = {
+        "company": company,
+        "market_data": db.market_data.find_one({"ticker": ticker}, {"_id": 0}, sort=[("t", -1)]),
+        "basic_financials": db.basic_financials.find_one({"_id": ticker}, {"_id": 0}),
+        "latest_earnings": db.earnings_reports.find_one({"ticker": ticker}, {"_id": 0}, sort=[("year", -1), ("quarter", -1)]),
+        "latest_news": list(db.news.find({"ticker": ticker}, {"_id": 0}).sort("datetime", -1).limit(5)),
+        "recent_filings": list(db.sec_fillings.find({"ticker": ticker}, {"_id": 0}).sort("filedDate", -1).limit(3)),
+        "insider_sentiment": list(db.insider_sentiment.find({"ticker": ticker}, {"_id": 0}).sort([("year", -1), ("month", -1)]).limit(6))
+    }
+    
+    return summary
+
+@app.get("/health")
+def health_check():
+    """API health check"""
+    try:
+        # Test database connection
+        db.companies.count_documents({}, limit=1)
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database connection failed: {str(e)}")
+
+@app.get("/")
+def root():
+    """API root endpoint"""
+    return {
+        "message": "Investment Research API",
+        "version": "1.0.0",
+        "endpoints": {
+            "companies": "/companies, /company/{ticker}",
+            "earnings": "/earnings/{ticker}, /earnings",
+            "news": "/news/{ticker}, /news",
+            "filings": "/filings/{ticker}",
+            "market_data": "/market-data/{ticker}, /market-data",
+            "earnings_surprises": "/earnings-surprises/{ticker}",
+            "financials_reported": "/financials-reported/{ticker}",
+            "insider_sentiment": "/insider-sentiment/{ticker}",
+            "basic_financials": "/basic-financials/{ticker}",
+            "utilities": "/tickers, /ticker-summary/{ticker}, /health"
+        }
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
