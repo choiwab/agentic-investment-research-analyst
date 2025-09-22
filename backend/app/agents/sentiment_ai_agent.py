@@ -171,9 +171,13 @@ class SentimentAgent:
                     "negative": result["negative_prob"],
                     "neutral": result["neutral_prob"]
                 },
-                "dominant_sentiment": result["dominant_sentiment"],
+                "dominant_sentiment": result["sentiment_label"],
                 "sentiment_context": self._analyze_sentiment_context(text, result)
             }
+            if "uncertainty_entropy" in result:
+                sentiment_data["uncertainty_entropy"] = result["uncertainty_entropy"]
+            if "evidence" in result:
+                sentiment_data["evidence"] = result["evidence"]
             
             return {
                 "sentiment_results": convert_numpy_types(sentiment_data),

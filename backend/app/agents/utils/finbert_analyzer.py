@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+_SENT_SPLIT_RE = re.compile(r'(?<=[\.\?!])\s+')
 
 class FinBERTAnalyzer:
     
@@ -98,21 +99,47 @@ class FinBERTAnalyzer:
             
         return chunks
     
+    @staticmethod
+    def _entropy_row(p: np.ndarray) -> float:
+        p = np.clip(p, 1e-9, 1.0)
+        return float(-(p * np.log(p)).sum())
+    
+    def _split_sentences(self, text: str) -> List[str]:
+        text = self.preprocess_text(text or "")
+        if not text:
+            return []
+        sents = _SENT_SPLIT_RE.split(text)
+        sents = [s.strip() for s in sents if 5 <= len(s) <= 300]
+        seen, uniq = set(), []
+        for s in sents:
+            key = s.lower()
+            if key not in seen:
+                seen.add(key)
+                uniq.append(s)
+        return uniq
+    
+    def _score_texts(self, texts: List[str], max_length: int = 128) -> np.ndarray:
+        if not texts:
+            return np.zeros((0, 3), dtype=np.float32)
+        enc = self.tokenizer(
+            texts,
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=max_length
+        )
+        enc = {k: v.to(self.device) for k, v in enc.items()}
+        logits = self.model(**enc).logits
+        probs = torch.softmax(logits, dim=-1).detach().cpu().numpy()
+        return probs
+
+    
     def analyze_sentiment(self, text: str) -> Dict[str, float]:
-        """Analyze sentiment using FinBERT model"""
-
         try:
-            # Preprocess text
             processed_text = self.preprocess_text(text)
-            
-
-            # Split into chunks if necessary
             chunks = self.chunk_text(processed_text)
-            
             all_probabilities = []
-            
             for chunk in chunks:
-                # Tokenize
                 inputs = self.tokenizer(
                     chunk,
                     return_tensors="pt",
@@ -121,20 +148,17 @@ class FinBERTAnalyzer:
                     max_length=512
                 )
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
-                
-                # Get predictions
                 with torch.no_grad():
                     outputs = self.model(**inputs)
                     predictions = torch.nn.functional.softmax(outputs.logits, dim=-1)
-                    
-                # Convert to numpy
-                predictions_np = predictions.cpu().numpy()[0]
-                all_probabilities.append(predictions_np)
-            
-            avg_probabilities = np.mean(all_probabilities, axis=0)
-            # Convert to native Python types for serialization
-            avg_probabilities = avg_probabilities.astype(float)
-            
+                all_probabilities.append(predictions.cpu().numpy()[0])
+            if not all_probabilities:
+                return None
+
+            probs_mat = np.vstack(all_probabilities)
+            avg_probabilities = probs_mat.mean(axis=0).astype(float)
+            entropy_mean = float(np.mean([self._entropy_row(p) for p in probs_mat]))
+
             sentiment_probs = {}
             for idx, label in self.label_mapping.items():
                 label_lower = label.lower()
@@ -144,18 +168,31 @@ class FinBERTAnalyzer:
                     sentiment_probs['negative'] = float(avg_probabilities[idx])
                 elif 'neu' in label_lower:
                     sentiment_probs['neutral'] = float(avg_probabilities[idx])
-            
-            # Ensure we have all three sentiments
             sentiment_probs.setdefault('positive', 0.0)
             sentiment_probs.setdefault('negative', 0.0)
             sentiment_probs.setdefault('neutral', 0.0)
-            
-            # Calculate sentiment score (-1 to 1)
+
             sentiment_score = sentiment_probs['positive'] - sentiment_probs['negative']
-            
             dominant_sentiment = max(sentiment_probs, key=sentiment_probs.get)
             confidence = sentiment_probs[dominant_sentiment]
-            
+
+            evidence = {"sentiment": dominant_sentiment, "sentences": []}
+            sentences = self._split_sentences(processed_text)
+            if sentences:
+                sent_probs = self._score_texts(sentences, max_length=128)
+                idx_pos = next((i for i, l in self.label_mapping.items() if 'pos' in l.lower()), 2)
+                idx_neg = next((i for i, l in self.label_mapping.items() if 'neg' in l.lower()), 0)
+                idx_neu = next((i for i, l in self.label_mapping.items() if 'neu' in l.lower()), 1)
+                idx_map = {"positive": idx_pos, "negative": idx_neg, "neutral": idx_neu}
+                dom_idx = idx_map.get(dominant_sentiment, idx_pos)
+                dom_probs = sent_probs[:, dom_idx] if len(sent_probs) else np.array([])
+                k = min(5, len(sentences))
+                if k > 0 and dom_probs.size:
+                    top_idx = np.argsort(-dom_probs)[:k]
+                    evidence["sentences"] = [
+                        {"sentence": sentences[i], "score": float(dom_probs[i])} for i in top_idx
+                    ]
+
             return {
                 "sentiment_score": float(sentiment_score),
                 "confidence_score": float(confidence),
@@ -163,9 +200,9 @@ class FinBERTAnalyzer:
                 "positive_prob": sentiment_probs['positive'],
                 "negative_prob": sentiment_probs['negative'],
                 "neutral_prob": sentiment_probs['neutral'],
-                "dominant_sentiment": dominant_sentiment
+                "uncertainty_entropy": entropy_mean,
+                "evidence": evidence
             }
-            
         except Exception as e:
             print(f"Error in FinBERT analysis: {e}")
     
@@ -215,3 +252,5 @@ if __name__ == "__main__":
         print(f"Confidence: {result['confidence_score']:.3f}")
         print(f"Probabilities - Pos: {result['positive_prob']:.3f}, "
               f"Neg: {result['negative_prob']:.3f}, Neu: {result['neutral_prob']:.3f}")
+        print(f"Uncertainty Entropy: {result['uncertainty_entropy']}")
+        print(f"Evidence: {result['evidence']}")
