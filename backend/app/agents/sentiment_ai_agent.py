@@ -260,9 +260,23 @@ class SentimentAgent:
     def _synthesis_node(self, state: AgentState) -> Dict[str, Any]:
         try:
             synthesis_prompt = self._create_synthesis_prompt(state)
-            
             response = self.llm.invoke(synthesis_prompt)
-            
+
+            parsed_structured = {}
+            if hasattr(self, "parser") and self.parser:
+                try:
+                    parsed_structured = self.parser.parse(response.content)
+                except Exception:
+                    try:
+                        retry_msg = f"""Your previous output did not contain valid JSON matching the schema.
+    Return ONLY a valid JSON object per these instructions:
+    {self.parser.get_format_instructions()}"""
+                        retry_resp = self.llm.invoke(retry_msg)
+                        parsed_structured = self.parser.parse(retry_resp.content)
+                        response = retry_resp
+                    except Exception:
+                        parsed_structured = {}
+
             final_analysis = {
                 "executive_summary": self._generate_executive_summary(state),
                 "sentiment_analysis": state.get("sentiment_results", {}),
@@ -272,9 +286,10 @@ class SentimentAgent:
                 "key_insights": self._extract_key_insights(state),
                 "recommendations": self._generate_comprehensive_recommendations(state),
                 "confidence_metrics": self._calculate_confidence_metrics(state),
-                "llm_synthesis": response.content
+                "llm_synthesis": response.content,
+                "llm_synthesis_structured": parsed_structured,
             }
-            
+
             final_analysis["metadata"] = {
                 "ticker": state.get("ticker"),
                 "text_length": len(state["text"]),
@@ -288,13 +303,13 @@ class SentimentAgent:
                     "synthesis"
                 ]
             }
-            
+
             return {
                 "final_analysis": convert_numpy_types(final_analysis),
                 "current_stage": AnalysisStage.SYNTHESIS.value,
-                "messages": [AIMessage(content="Analysis synthesis complete")]
+                "messages": [AIMessage(content="Analysis synthesis complete (narrative + structured)")],
             }
-            
+
         except Exception as e:
             return {
                 "errors": [f"Synthesis failed: {str(e)}"],
@@ -514,7 +529,20 @@ class SentimentAgent:
         
         Keep the summary concise but comprehensive, focusing on actionable insights.
         """
-        
+        # Get machine readable JSON block for future work
+        try: 
+            format_instructions = self.parser.get_format_instructions()
+            prompt += f"""
+
+        ---
+        Additionally, return a JSON object that follows these instructions.
+        Do not include any prose before or after the JSON object.
+
+        {format_instructions}
+        """
+        except Exception:
+            pass
+
         return prompt
 
     def _generate_executive_summary(self, state: AgentState) -> str:
