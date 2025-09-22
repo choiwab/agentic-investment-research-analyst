@@ -397,15 +397,23 @@ class SentimentAgent:
     def _generate_mitigation_suggestions(self, risk_result: Dict) -> List[str]:
         suggestions = []
         risk_scores = risk_result.get("risk_scores", {})
+
+        market = risk_scores.get("market_risk", 0.0)
+        operational = risk_scores.get("operational_risk", 0.0)
+        financial = risk_scores.get("financial_risk", 0.0)
+        regulatory = risk_scores.get("regulatory_risk", 0.0)
+        strategic = risk_scores.get("strategic_risk", 0.0)
         
-        if risk_scores.get("market", 0) > 0.6:
+        if market > 0.6:
             suggestions.append("Consider diversification strategies to reduce market risk exposure")
-        if risk_scores.get("operational", 0) > 0.6:
+        if operational > 0.6:
             suggestions.append("Review and strengthen operational processes and contingency plans")
-        if risk_scores.get("financial", 0) > 0.6:
+        if financial > 0.6:
             suggestions.append("Focus on improving financial metrics and liquidity management")
-        if risk_scores.get("regulatory", 0) > 0.6:
+        if regulatory > 0.6:
             suggestions.append("Enhance regulatory compliance monitoring and reporting")
+        if strategic > 0.6:
+            suggestions.append("Stress-test strategic initiatives and address customer concentration")
         
         return suggestions
 
