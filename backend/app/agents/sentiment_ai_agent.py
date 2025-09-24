@@ -15,6 +15,10 @@ from utils.finbert_analyzer import FinBERTAnalyzer
 from utils.model_schema import SentimentModel
 from utils.sec_risk_analyzer import SECRiskAnalyzer
 
+from news_scraper import NewsScraperAgent
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv()
 
 def convert_numpy_types(obj):
     if isinstance(obj, np.integer):
@@ -67,6 +71,11 @@ class SentimentAgent:
             streaming=True, 
             callbacks=[self.callback_handler]
         )
+        try:
+            _ = self.llm.invoke("ping")
+            print("[SentimentAgent] Ollama LLM reachable.")
+        except Exception as e:
+            print(f"[SentimentAgent] Ollama not reachable or model not loaded: {e}")
         
         self.finbert_analyzer = FinBERTAnalyzer(model_name=finbert_model)
         self.risk_analyzer = SECRiskAnalyzer()
@@ -194,8 +203,8 @@ class SentimentAgent:
     def _risk_assessment_node(self, state: AgentState) -> Dict[str, Any]:
         try:
             text = state["text"]
-            
-            risk_result = self.risk_analyzer.analyze_comprehensive_risk(text)
+            ticker = state.get("ticker") or state.get("extracted_entities", {}).get("primary_ticker")
+            risk_result = self.risk_analyzer.analyze_comprehensive_risk(text, ticker=ticker)
             
             risk_data = {
                 "risk_scores": risk_result["risk_scores"],
@@ -661,6 +670,18 @@ class SentimentAgent:
         metrics['overall_confidence'] = float(np.mean(confidence_components)) if confidence_components else 0.0
         
         return convert_numpy_types(metrics)
+    
+    def _build_text_from_news(self, news: Dict[str, str]) -> str:
+        #For taking in output from NewsScraperAgent
+        
+        sections = []
+        if news.get("qualitative_summary"):
+            sections.append(f"Qualitative Summary:\n{news['qualitative_summary']}")
+        if news.get("quantitative_summary"):
+            sections.append(f"Quantitative Summary:\n{news['quantitative_summary']}")
+        if news.get("insight_outlook"):
+            sections.append(f"Insight/Outlook:\n{news['insight_outlook']}")
+        return "\n\n".join(sections)
 
     def run(self, text: str, ticker: Optional[str] = None, entities: Optional[List[str]] = None, 
             thread_id: Optional[str] = None) -> Dict[str, Any]:
@@ -678,6 +699,14 @@ class SentimentAgent:
         result = self.app.invoke(initial_state, config)
         
         return result.get("final_analysis", {})
+    
+    def run_from_news(self, news: Dict[str, str], ticker: Optional[str] = None) -> Dict[str, Any]:
+
+        # Run sentiment + risk + synthesis pipeline using the NewsScraperAgent output as input.
+    
+        text = self._build_text_from_news(news)
+        return self.run(text=text, ticker=ticker)
+    
 
     def run_batch(self, analyses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         results = []
@@ -703,15 +732,40 @@ class SentimentAgent:
 if __name__ == "__main__":
     agent = SentimentAgent(model="llama3.1")
     
-    sample_text = """
-    Orian Sh.M. Ltd delivered stable operational performance in Q2 2025 despite continued market volatility in energy prices. Revenue grew modestly, supported by strong offshore wind output, though profitability was impacted by higher financing costs and ongoing project delays in the U.S. portfolio. The company remains on track with its long-term renewable capacity expansion goals.
+    # sample_text = """
+    # Australia's top supermarket chains Woolworths and Coles said on Monday they could incur millions in additional remediation costs following the federal court's decision on historical underpayments to staff.
+    # """
+    
+    # results = agent.run(text=sample_text, ticker="WOLWF", thread_id="analysis_thread")
+    
+    # print(json.dumps(results, indent=2))
+    
+    # print("\n--- Analysis History ---\n")
+    # history = agent.get_analysis_history(thread_id="analysis_thread")
+    # for msg in history:
+    #     print(f"[{msg.type.upper()}]: {msg.content}\n")
+
+    ### Possible news scraper output
     """
+    # First, scrape
     
-    results = agent.run(text=sample_text, ticker="ORSHF", thread_id="analysis_thread")
-    
+    scraper = NewsScraperAgent(model="llama3.1")
+    news_output = scraper.run({"url": "https://sg.finance.yahoo.com/news/china-digital-plan-3-chinese-093000086.html"})
+
+    # Then analyze
+    agent = SentimentAgent(model="llama3.1")
+    results = agent.run_from_news(news_output, ticker="AAPL")
     print(json.dumps(results, indent=2))
+    """
+    print("============== Probable News Scraper Output ===============")
+    scraper_output = {
+    "qualitative_summary": "Tesla announced the expansion of its Gigafactory operations in Berlin, emphasizing a stronger push into the European EV market. Management highlighted continued improvements in production efficiency and battery technology. The company also stressed its focus on sustainability and reducing reliance on rare earth materials. Additionally, executives noted progress in software-driven features such as Full Self-Driving, which remains a long-term strategic priority.",
+     "quantitative_summary": "Q2 revenue: $25.3 billion. Net income: $3.4 billion. Automotive gross margin: 18.1%. Energy segment revenue: $1.5 billion. Deliveries: 466,000 vehicles. Operating cash flow: $2.6 billion. Capex: $2.1 billion.",
+     "insight_outlook": "Tesla’s near-term outlook appears stable, supported by strong delivery volumes and expanding production capacity. However, margin compression remains a concern due to pricing pressures and rising raw material costs. The long-term outlook hinges on successful scaling of energy storage and autonomy features. Overall, while growth prospects are strong, investors should monitor margins and regulatory developments in key markets."
+     }
     
-    print("\n--- Analysis History ---\n")
-    history = agent.get_analysis_history(thread_id="analysis_thread")
-    for msg in history:
-        print(f"[{msg.type.upper()}]: {msg.content}\n")
+    r = agent.run(scraper_output["qualitative_summary"])
+    print(json.dumps(r, indent=2))
+    results_from_news = agent.run_from_news(scraper_output, ticker="TSLA")
+    print("\n--- Analysis from News Output ---\n")
+    print(json.dumps(results_from_news, indent=2))
