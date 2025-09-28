@@ -2,7 +2,7 @@ import json
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Optional, Sequence, TypedDict
+from typing import Annotated, Any, Dict, List, Optional, Sequence, TypedDict, Tuple
 
 import numpy as np
 from langchain.output_parsers import StructuredOutputParser
@@ -165,39 +165,52 @@ class SentimentAgent:
     def _sentiment_analysis_node(self, state: AgentState) -> Dict[str, Any]:
         try:
             text = state["text"]
-            
             result = self.finbert_analyzer.analyze_sentiment(text)
-            
             if not result:
                 raise ValueError("Sentiment analysis returned no results")
-            
+
             sentiment_data = {
-                "label": result["sentiment_label"],
-                "confidence": result["confidence_score"],
-                "sentiment_score": result["sentiment_score"],
+                "label": result.get("sentiment_label", "neutral"),
+                "confidence": float(result.get("confidence_score", 0.0)),
+                "sentiment_score": float(result.get("sentiment_score", 0.0)),
                 "probabilities": {
-                    "positive": result["positive_prob"],
-                    "negative": result["negative_prob"],
-                    "neutral": result["neutral_prob"]
+                    "positive": float(result.get("positive_prob", 0.0)),
+                    "negative": float(result.get("negative_prob", 0.0)),
+                    "neutral":  float(result.get("neutral_prob", 0.0)),
                 },
-                "dominant_sentiment": result["sentiment_label"],
-                "sentiment_context": self._analyze_sentiment_context(text, result)
+                "dominant_sentiment": result.get("sentiment_label", "neutral"),
+                "sentiment_context": self._analyze_sentiment_context(text, result),
             }
-            if "uncertainty_entropy" in result:
-                sentiment_data["uncertainty_entropy"] = result["uncertainty_entropy"]
-            if "evidence" in result:
+
+            # Prefer analyzer-provided evidence; otherwise fall back to sentence-level evidence
+            if "evidence" in result and result["evidence"]:
                 sentiment_data["evidence"] = result["evidence"]
-            
+            else:
+                ev = self._collect_sentiment_evidence(
+                    text, sentiment_data["dominant_sentiment"], top_k=5
+                )
+                if ev:
+                    sentiment_data["evidence"] = ev
+
+            if "uncertainty_entropy" in result:
+                sentiment_data["uncertainty_entropy"] = float(result["uncertainty_entropy"])
+
             return {
                 "sentiment_results": convert_numpy_types(sentiment_data),
                 "current_stage": AnalysisStage.SENTIMENT_ANALYSIS.value,
-                "messages": [AIMessage(content=f"Sentiment analysis complete: {sentiment_data['label']} ({sentiment_data['confidence']:.2f} confidence)")]
+                "messages": [
+                    AIMessage(
+                        content=f"Sentiment analysis complete: "
+                                f"{sentiment_data['label']} "
+                                f"({sentiment_data['confidence']:.2f} confidence)"
+                    )
+                ],
             }
-            
+
         except Exception as e:
             return {
                 "errors": [f"Sentiment analysis failed: {str(e)}"],
-                "current_stage": "error"
+                "current_stage": "error",
             }
 
     def _risk_assessment_node(self, state: AgentState) -> Dict[str, Any]:
@@ -298,9 +311,10 @@ class SentimentAgent:
                 "entities": state.get("extracted_entities", {}),
                 "key_insights": self._extract_key_insights(state),
                 "recommendations": self._generate_comprehensive_recommendations(state),
-                "confidence_metrics": self._calculate_confidence_metrics(state),
-                "llm_synthesis": response.content,
-                "llm_synthesis_structured": parsed_structured,
+                "confidence_metrics": self._calculate_confidence_metrics(state)
+                # Uncomment if you want the full machine-readable content (for future work)
+                # "llm_synthesis": response.content,
+                # "llm_synthesis_structured": parsed_structured,
             }
 
             final_analysis["metadata"] = {
@@ -682,6 +696,52 @@ class SentimentAgent:
         if news.get("insight_outlook"):
             sections.append(f"Insight/Outlook:\n{news['insight_outlook']}")
         return "\n\n".join(sections)
+    
+
+    def _split_sentences(self, text: str) -> List[str]:
+        parts = re.split(r'(?<=[\.\!\?])\s+', text.strip())
+        return [p for p in parts if p]
+
+    def _collect_sentiment_evidence(self, text: str, dominant_label: str, top_k: int = 5) -> List[Dict[str, Any]]:
+  
+        # Returns top_k sentences that most strongly support the dominant sentiment.
+        
+        sentences = self._split_sentences(text)
+        scored: List[Tuple[float, Dict[str, Any]]] = []
+
+        for s in sentences:
+            try:
+                r = self.finbert_analyzer.analyze_sentiment(s)
+                # choose a score that ranks by how strongly it matches dominant_label
+                label = r.get("sentiment_label", "neutral")
+                pos = float(r.get("positive_prob", 0.0))
+                neu = float(r.get("neutral_prob", 0.0))
+                neg = float(r.get("negative_prob", 0.0))
+                conf = float(r.get("confidence_score", 0.0))
+
+                if dominant_label == "positive":
+                    rank_score = pos - max(neu, neg)
+                elif dominant_label == "negative":
+                    rank_score = neg - max(neu, pos)
+                else:  # neutral: prefer high neutral & low max(pos,neg)
+                    rank_score = neu - max(pos, neg)
+
+                scored.append((
+                    float(rank_score),
+                    {
+                        "sentence": s,
+                        "label": label,
+                        "confidence": conf,
+                        "positive_prob": pos,
+                        "neutral_prob": neu,
+                        "negative_prob": neg,
+                    }
+                ))
+            except Exception:
+                continue
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [item for _, item in scored[:top_k]]
 
     def run(self, text: str, ticker: Optional[str] = None, entities: Optional[List[str]] = None, 
             thread_id: Optional[str] = None) -> Dict[str, Any]:
@@ -746,26 +806,26 @@ if __name__ == "__main__":
     #     print(f"[{msg.type.upper()}]: {msg.content}\n")
 
     ### Possible news scraper output
-    """
+    
     # First, scrape
     
     scraper = NewsScraperAgent(model="llama3.1")
-    news_output = scraper.run({"url": "https://sg.finance.yahoo.com/news/china-digital-plan-3-chinese-093000086.html"})
+    news_output = scraper.run({"url": "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"})
 
     # Then analyze
     agent = SentimentAgent(model="llama3.1")
-    results = agent.run_from_news(news_output, ticker="AAPL")
+    results = agent.run_from_news(news_output, ticker="")
     print(json.dumps(results, indent=2))
-    """
-    print("============== Probable News Scraper Output ===============")
-    scraper_output = {
-    "qualitative_summary": "Tesla announced the expansion of its Gigafactory operations in Berlin, emphasizing a stronger push into the European EV market. Management highlighted continued improvements in production efficiency and battery technology. The company also stressed its focus on sustainability and reducing reliance on rare earth materials. Additionally, executives noted progress in software-driven features such as Full Self-Driving, which remains a long-term strategic priority.",
-     "quantitative_summary": "Q2 revenue: $25.3 billion. Net income: $3.4 billion. Automotive gross margin: 18.1%. Energy segment revenue: $1.5 billion. Deliveries: 466,000 vehicles. Operating cash flow: $2.6 billion. Capex: $2.1 billion.",
-     "insight_outlook": "Tesla’s near-term outlook appears stable, supported by strong delivery volumes and expanding production capacity. However, margin compression remains a concern due to pricing pressures and rising raw material costs. The long-term outlook hinges on successful scaling of energy storage and autonomy features. Overall, while growth prospects are strong, investors should monitor margins and regulatory developments in key markets."
-     }
     
-    r = agent.run(scraper_output["qualitative_summary"])
-    print(json.dumps(r, indent=2))
-    results_from_news = agent.run_from_news(scraper_output, ticker="TSLA")
-    print("\n--- Analysis from News Output ---\n")
-    print(json.dumps(results_from_news, indent=2))
+    # print("============== Probable News Scraper Output ===============")
+    # scraper_output = {
+    # "qualitative_summary": "Tesla announced the expansion of its Gigafactory operations in Berlin, emphasizing a stronger push into the European EV market. Management highlighted continued improvements in production efficiency and battery technology. The company also stressed its focus on sustainability and reducing reliance on rare earth materials. Additionally, executives noted progress in software-driven features such as Full Self-Driving, which remains a long-term strategic priority.",
+    #  "quantitative_summary": "Q2 revenue: $25.3 billion. Net income: $3.4 billion. Automotive gross margin: 18.1%. Energy segment revenue: $1.5 billion. Deliveries: 466,000 vehicles. Operating cash flow: $2.6 billion. Capex: $2.1 billion.",
+    #  "insight_outlook": "Tesla’s near-term outlook appears stable, supported by strong delivery volumes and expanding production capacity. However, margin compression remains a concern due to pricing pressures and rising raw material costs. The long-term outlook hinges on successful scaling of energy storage and autonomy features. Overall, while growth prospects are strong, investors should monitor margins and regulatory developments in key markets."
+    #  }
+    
+    # r = agent.run(scraper_output["qualitative_summary"])
+    # print(json.dumps(r, indent=2))
+    # results_from_news = agent.run_from_news(scraper_output, ticker="TSLA")
+    # print("\n--- Analysis from News Output ---\n")
+    # print(json.dumps(results_from_news, indent=2))
