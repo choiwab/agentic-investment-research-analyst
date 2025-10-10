@@ -1,15 +1,16 @@
 import os
-import re, json
+
 from dotenv import load_dotenv
+from langchain.agents import AgentExecutor, AgentType, initialize_agent
+from langchain.tools import BaseTool
 
 # Agent Setup and Structuring Output
 from langchain_openai import ChatOpenAI
-from langchain.agents import AgentType, tool, initialize_agent, AgentExecutor
-from langchain.tools import BaseTool
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
 from utils.conversation_buffer_safe import SafeConversationMemory
+from utils.tools import fetch_peers, web_search
 
 load_dotenv()
 
@@ -31,7 +32,7 @@ class PreprocessAgent:
     
     def build_agent(self) -> AgentExecutor:
         """Builds a REACT Agent"""
-        system_template : str = f"""
+        system_template : str = """
         You are a preprocessing agent specialized in finance and research.
         Your task is to classify a user's query into exactly one of the following categories:
         - "finance-company": Query is micro-level, specifically about one company or a set of companies 
@@ -71,12 +72,7 @@ class PreprocessAgent:
         )
     
     def get_tools(self) -> list[BaseTool]:
-        @tool
-        def do_nothing(query: str) -> str:
-            """Don't use this tool for now. It's just for testing"""
-            return ""
-        
-        return [do_nothing]
+        return [fetch_peers, web_search]
 
     def run(self, state: dict[str, str]) -> dict[str, str]:
         """Agent categorizes the query"""
@@ -86,7 +82,8 @@ class PreprocessAgent:
     
 if __name__ == "__main__":
     agent = PreprocessAgent(model = "gpt-4o-mini")
-    state = {"query" : "Should I invest in Tesla or Apple?"}
+    # state = {"query" : "Should I invest in QSR or FNLIF"}
+    state = {"query" : "I want to know about quantum stock"}
     results = agent.run(state)
     print(results)
 

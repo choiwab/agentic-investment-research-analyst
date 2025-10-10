@@ -1,11 +1,17 @@
-import os
 import json
+import os
+from typing import Any, Dict, List
+
 import requests
-from typing import List, Dict, Any
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from langchain.tools import tool
 
-# FastAPI base URL - defaults to localhost, override with env var
+load_dotenv()
+
 FASTAPI_BASE_URL = os.getenv("FASTAPI_BASE_URL", "http://127.0.0.1:8000")
+
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 
 
 @tool
@@ -131,6 +137,80 @@ def _fetch_single_ticker(ticker: str) -> Dict[str, Any]:
         data["insider_sentiment"] = {"error": str(e)}
 
     return data
+
+
+@tool
+def fetch_peers(ticker: str) -> Dict[str, Any]:
+    """
+    Fetch peer tickers for a given symbol from the FastAPI backend.
+
+    Args:
+        ticker: Stock ticker symbol (e.g., "AAPL")
+
+    Returns:
+        A dict with keys: ticker (string) and peers (list of strings).
+    """
+    try:
+        response = requests.get(f"{FASTAPI_BASE_URL}/peers/{ticker}", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        if response.status_code == 404:
+            return {"ticker": ticker, "peers": []}
+        return {"error": f"HTTP {response.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@tool
+def web_search(query: str) -> Dict[str, Any]:
+    """
+    Perform a web search via Tavily API and scrape text content from result pages.
+
+    Input: free-text keyword like "quantum stocks" or "macro events today".
+    Output: A dict with keys: query (string) and results (list of objects with url and text).
+    """
+    try:
+
+        max_results = 5
+        tavily_url = "https://api.tavily.com/search"
+        payload = {
+            "api_key": TAVILY_API_KEY,
+            "query": query,
+            "search_depth": "advanced",
+            "include_answer": False,
+            "max_results": max_results,
+        }
+        sr = requests.post(tavily_url, json=payload, timeout=30)
+        if sr.status_code != 200:
+            return {"error": f"Tavily HTTP {sr.status_code}", "details": sr.text}
+
+        data = sr.json()
+        links: List[str] = []
+        for item in data.get("results", [])[:max_results]:
+            url = item.get("url")
+            if url and url.startswith("http"):
+                links.append(url)
+
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/114.0.0.0 Safari/537.36"
+            )
+        }
+        results = []
+        for url in links:
+            try:
+                page = requests.get(url, headers=headers, timeout=20)
+                psoup = BeautifulSoup(page.text, "html.parser")
+                text = "\n".join(p.get_text(strip=True) for p in psoup.find_all("p"))
+                results.append({"url": url, "text": text[:20000]})
+            except Exception as e:
+                results.append({"url": url, "error": str(e)})
+
+        return {"query": query, "results": results}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @tool

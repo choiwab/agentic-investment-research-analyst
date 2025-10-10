@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import finnhub
 from bson.int64 import Int64
 from dotenv import load_dotenv
-from pymongo import MongoClient
+# from pymongo import MongoClient
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -98,6 +98,16 @@ def extract_insider_sentiment(ticker, days=365):
 def extract_basic_financials(ticker, metric="all"):
     return finnhub_client.company_basic_financials(symbol=ticker, metric=metric) or {}
 
+
+
+def extract_peers(ticker):
+    return finnhub_client.company_peers(symbol=ticker) or []
+
+def transform_peers(rows, ticker):
+    peers = [p for p in rows or [] if isinstance(p, str) and p]
+    if not peers:
+        return None
+    return {"_id": ticker, "ticker": ticker, "peers": peers}
 
 # ---- TRANSFORM ----
 def transform_company_profile(raw):
@@ -265,6 +275,11 @@ def run_pipeline(exchange="US", max_symbols=5):
         profile = transform_company_profile(extract_company_profile(ticker))
         if profile:
             db.companies.update_one({"_id": profile["_id"]}, {"$set": profile}, upsert=True)
+
+        # peers
+        peers_doc = transform_peers(extract_peers(ticker), ticker)
+        if peers_doc:
+            db.peers.update_one({"_id": peers_doc["_id"]}, {"$set": peers_doc}, upsert=True)
 
         # earnings
         for d in transform_earnings(extract_earnings(ticker), ticker):
