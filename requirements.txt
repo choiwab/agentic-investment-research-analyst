@@ -1,6 +1,7 @@
 langchain == 0.3.27
 langchain_ollama == 0.3.7
 langgraph == 0.6.7
+langchain-openai
 
 fastapi
 uvicorn
@@ -17,3 +18,4 @@ yfinance
 pandas
 numpy
 scipy
+
