@@ -456,7 +456,9 @@ class ResearchCompilerAgent:
                     if value and isinstance(value, (int, float)):
                         labels.append(key.replace("_", " ").upper())
                         sizes.append(abs(value))  # Use absolute values for pie chart
-                        colors_pie.append('#' + ''.join([f'{i:02x}' for i in sns.color_palette("husl", len(val_metrics))[len(labels)-1][:3]]))
+                        # Generate color from palette
+                        color_rgb = sns.color_palette("husl", len(val_metrics))[len(labels)-1][:3]
+                        colors_pie.append('#' + ''.join([f'{int(i*255):02x}' for i in color_rgb]))
 
                 if labels:
                     ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors_pie, startangle=90)
