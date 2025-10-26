@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import requests
 from bs4 import BeautifulSoup
@@ -15,12 +15,12 @@ TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 
 
 @tool
-def fetch_ticker_data(tickers: List[str]) -> Dict[str, Any]:
+def fetch_ticker_data(tickers: Union[str, List[str]]) -> Dict[str, Any]:
     """
     Fetches comprehensive financial data for a list of ticker symbols from the FastAPI backend.
 
     Args:
-        tickers: List of ticker symbols (e.g., ["TSLA", "AAPL"])
+        tickers: Single ticker string (e.g., "TSLA") or List of ticker symbols (e.g., ["TSLA", "AAPL"])
 
     Returns:
         Dictionary with ticker symbols as keys, each containing all relevant financial data in nested JSON format.
@@ -28,7 +28,12 @@ def fetch_ticker_data(tickers: List[str]) -> Dict[str, Any]:
     """
     result = {}
 
-    for ticker in tickers:
+    if isinstance(tickers, str):
+        ticker_list = [tickers]
+    else:
+        ticker_list = tickers
+
+    for ticker in ticker_list:
         try:
             ticker_data = _fetch_single_ticker(ticker)
             result[ticker] = ticker_data
@@ -140,16 +145,19 @@ def _fetch_single_ticker(ticker: str) -> Dict[str, Any]:
 
 
 @tool
-def fetch_peers(ticker: str) -> Dict[str, Any]:
+def fetch_peers(ticker: Union[str, List[str]]) -> Dict[str, Any]:
     """
     Fetch peer tickers for a given symbol from the FastAPI backend.
 
     Args:
-        ticker: Stock ticker symbol (e.g., "AAPL")
+        ticker: Single ticker string (e.g., "TSLA") or single-element list (e.g., ["TSLA"])
 
     Returns:
-        A dict with keys: ticker (string) and peers (list of strings).
+        List of peer ticker symbols
     """
+    
+    if isinstance(ticker, list):
+        ticker = ticker[0] if ticker else ""
     try:
         response = requests.get(f"{FASTAPI_BASE_URL}/peers/{ticker}", timeout=10)
         if response.status_code == 200:
