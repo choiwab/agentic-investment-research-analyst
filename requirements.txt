@@ -8,10 +8,14 @@ uvicorn
 requests
 beautifulsoup4
 pymongo
-langchain
 huggingface-hub
 transformers
 streamlit
 finnhub-python
 python-dotenv
-dotenv
+torch
+yfinance
+pandas
+numpy
+scipy
+
