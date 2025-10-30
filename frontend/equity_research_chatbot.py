@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime
 import json
 from typing import Dict, Any
+import markdown
 
 # Add paths for imports (must be BEFORE importing agents)
 project_root = Path(__file__).parent.parent
@@ -98,69 +99,71 @@ st.markdown("""
     /* Metrics cards - semi-transparent */
     .metric-card {
         background-color: rgba(255, 255, 255, 0.05);
-        padding: 20px;
-        border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        margin: 10px 0;
-        color: inherit;
-    }
-
-    .metric-card h4 {
-        color: inherit;
-        margin-top: 0;
-    }
-
-    .metric-card p {
-        color: inherit;
-    }
-
-    /* Recommendations */
-    .recommendation {
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 5px;
-        margin: 10px 0;
-    }
-
-    .rec-buy {
-        background-color: rgba(76, 175, 80, 0.2);
-        color: #4CAF50;
-        border: 2px solid #4CAF50;
-    }
-
-    .rec-hold {
-        background-color: rgba(255, 152, 0, 0.2);
-        color: #FF9800;
-        border: 2px solid #FF9800;
-    }
-
-    .rec-sell {
-        background-color: rgba(244, 67, 54, 0.2);
-        color: #F44336;
-        border: 2px solid #F44336;
-    }
-
-    /* Processing indicator */
-    .processing {
-        color: #2196F3;
-        font-style: italic;
-    }
-
-    /* Error messages */
-    .error-box {
-        background-color: rgba(244, 67, 54, 0.1);
-        border-left: 4px solid #F44336;
         padding: 15px;
         border-radius: 5px;
         margin: 10px 0;
         color: inherit;
     }
 
-    /* Success messages */
+    /* Recommendation boxes */
+    .recommendation {
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .rec-buy {
+        background-color: rgba(76, 175, 80, 0.2);
+        border: 2px solid #4CAF50;
+        color: #4CAF50;
+    }
+
+    .rec-sell {
+        background-color: rgba(244, 67, 54, 0.2);
+        border: 2px solid #f44336;
+        color: #f44336;
+    }
+
+    .rec-hold {
+        background-color: rgba(255, 152, 0, 0.2);
+        border: 2px solid #FF9800;
+        color: #FF9800;
+    }
+
+    /* Info boxes */
     .success-box {
         background-color: rgba(76, 175, 80, 0.1);
         border-left: 4px solid #4CAF50;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+        color: inherit;
+    }
+
+    .warning-box {
+        background-color: rgba(255, 152, 0, 0.1);
+        border-left: 4px solid #FF9800;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+        color: inherit;
+    }
+
+    .error-box {
+        background-color: rgba(244, 67, 54, 0.1);
+        border-left: 4px solid #f44336;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+        color: inherit;
+    }
+
+    .info-box {
+        background-color: rgba(33, 150, 243, 0.1);
+        border-left: 4px solid #2196F3;
         padding: 15px;
         border-radius: 5px;
         margin: 10px 0;
@@ -174,6 +177,25 @@ st.markdown("""
 
     .metric-card * {
         color: inherit !important;
+    }
+
+    /* Stop button styling - small square button */
+    .stop-button button {
+        background-color: #666 !important;
+        color: white !important;
+        border: 1px solid #888 !important;
+        font-weight: normal !important;
+        padding: 8px !important;
+        border-radius: 4px !important;
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+        min-height: 40px !important;
+    }
+
+    .stop-button button:hover {
+        background-color: #555 !important;
+        border-color: #666 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -191,6 +213,9 @@ if "orchestrator" not in st.session_state:
 
 if "processing" not in st.session_state:
     st.session_state.processing = False
+
+if "stop_generation" not in st.session_state:
+    st.session_state.stop_generation = False
 
 # ============================================================================
 # SIDEBAR - CONFIGURATION & INFO
@@ -255,7 +280,7 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("---")
-    st.caption("Powered by LangGraph & OpenAI")
+    st.caption("Powered by LangGraph & Ollama")
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -297,89 +322,51 @@ def format_company_response(result: Dict[str, Any]) -> str:
 
     # Ticker info
     if result.get("ticker"):
-        html_parts.append(f"<h3>📌 {result['ticker']}</h3>")
+        html_parts.append(f"<h3>📌 {result['ticker']} - Company Analysis</h3>")
         if result.get("timeframe"):
             html_parts.append(f"<p><strong>Timeframe:</strong> {result['timeframe']}</p>")
 
-    # Executive summary
-    if result.get("executive_summary"):
-        html_parts.append(f"""
-        <div class="success-box">
-            <h4>Executive Summary</h4>
-            <p>{result['executive_summary']}</p>
-        </div>
-        """)
-
-    # Recommendation
+    # Recommendation (highlight at top)
     if result.get("recommendation"):
         rec_class = get_recommendation_class(result["recommendation"])
+        price_target_text = f" | Target: {result['price_target']}" if result.get("price_target") else ""
         html_parts.append(f"""
         <div class="recommendation {rec_class}">
-            💼 Recommendation: {result['recommendation']}
+            💼 <strong>Recommendation:</strong> {result['recommendation']}{price_target_text}
         </div>
         """)
 
-    # Financial metrics (if available)
-    if result.get("financials"):
-        html_parts.append("<div class='metric-card'><h4>📊 Financial Metrics</h4>")
+    # Build comprehensive text output combining all available content
+    comprehensive_text = []
 
-        financials = result["financials"]
-        if isinstance(financials, dict):
-            if "revenue" in financials:
-                rev = financials["revenue"]
-                html_parts.append(f"<p><strong>Revenue:</strong> ${rev.get('actual', 'N/A')}M (YoY: {rev.get('yoy_change', 'N/A')}%)</p>")
+    if result.get("executive_summary"):
+        comprehensive_text.append(f"<strong>Executive Summary:</strong><br>{result['executive_summary']}")
 
-            if "eps" in financials:
-                eps = financials["eps"]
-                html_parts.append(f"<p><strong>EPS:</strong> ${eps.get('actual', 'N/A')} (vs Est: {eps.get('vs_estimate', 'N/A')}%)</p>")
-
-        html_parts.append("</div>")
-
-    # Sentiment analysis
+    # Add sentiment info inline if available
     if result.get("sentiment_label"):
         sentiment_emoji = {"positive": "🟢", "neutral": "🟡", "negative": "🔴"}
         emoji = sentiment_emoji.get(result["sentiment_label"], "⚪")
+        sentiment_text = f"{emoji} <strong>Sentiment:</strong> {result['sentiment_label'].upper()} (Confidence: {result.get('sentiment_confidence', 0):.2%})"
+        comprehensive_text.append(sentiment_text)
 
+    if result.get("financial_analysis"):
+        comprehensive_text.append(f"<strong>Financial Analysis:</strong><br>{result['financial_analysis']}")
+
+    if result.get("news_sentiment_analysis"):
+        comprehensive_text.append(f"<strong>News & Sentiment:</strong><br>{result['news_sentiment_analysis']}")
+
+    if result.get("investment_outlook"):
+        comprehensive_text.append(f"<strong>Investment Outlook:</strong><br>{result['investment_outlook']}")
+
+    # Fallback to text_summary if nothing else available
+    if not comprehensive_text and result.get("text_summary"):
+        comprehensive_text.append(result['text_summary'])
+
+    # Display as single comprehensive content box
+    if comprehensive_text:
         html_parts.append(f"""
         <div class="metric-card">
-            <h4>💭 Sentiment Analysis</h4>
-            <p>{emoji} <strong>{result['sentiment_label'].upper()}</strong>
-            (Confidence: {result.get('sentiment_confidence', 0):.2%})</p>
-        </div>
-        """)
-
-    # Text summary
-    if result.get("text_summary"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <h4>📝 Detailed Analysis</h4>
-            <p>{result['text_summary']}</p>
-        </div>
-        """)
-
-    # Table
-    if result.get("table"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <h4>📋 Data Table</h4>
-            <div style="overflow-x:auto;">
-                {result['table']}
-            </div>
-        </div>
-        """)
-
-    # Output files
-    if result.get("pdf_path"):
-        html_parts.append(f"""
-        <div class="success-box">
-            <p>📄 PDF Report generated: <code>{os.path.basename(result['pdf_path'])}</code></p>
-        </div>
-        """)
-
-    if result.get("graphs"):
-        html_parts.append(f"""
-        <div class="success-box">
-            <p>📊 {len(result['graphs'])} graphs generated</p>
+            {('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')}
         </div>
         """)
 
@@ -396,52 +383,31 @@ def format_market_response(result: Dict[str, Any]) -> str:
     # Title
     html_parts.append("<h3>📈 Market Analysis</h3>")
 
-    # Timeframe
+    # Timeframe info
     if result.get("timeframe"):
-        html_parts.append(f"<p><strong>Timeframe:</strong> {result['timeframe']}</p>")
+        html_parts.append(f"<p><strong>Timeframe:</strong> {result['timeframe']} | <strong>Focus Areas:</strong> {', '.join(result.get('metrics', ['General market trends']))}</p>")
 
-    # Executive summary
+    # Build comprehensive text output combining all available content
+    comprehensive_text = []
+
     if result.get("executive_summary"):
-        html_parts.append(f"""
-        <div class="success-box">
-            <h4>Executive Summary</h4>
-            <p>{result['executive_summary']}</p>
-        </div>
-        """)
+        comprehensive_text.append(f"<strong>Executive Summary:</strong><br>{result['executive_summary']}")
 
-    # Market analysis
     if result.get("financial_analysis"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <h4>📊 Market Insights</h4>
-            <p>{result['financial_analysis']}</p>
-        </div>
-        """)
+        comprehensive_text.append(f"<strong>Market Analysis:</strong><br>{result['financial_analysis']}")
 
-    # Outlook
     if result.get("investment_outlook"):
+        comprehensive_text.append(f"<strong>Market Outlook:</strong><br>{result['investment_outlook']}")
+
+    # Fallback to text_summary if nothing else available
+    if not comprehensive_text and result.get("text_summary"):
+        comprehensive_text.append(result['text_summary'])
+
+    # Display as single comprehensive content box
+    if comprehensive_text:
         html_parts.append(f"""
         <div class="metric-card">
-            <h4>🔮 Outlook</h4>
-            <p>{result['investment_outlook']}</p>
-        </div>
-        """)
-
-    # Recommendation
-    if result.get("recommendation"):
-        html_parts.append(f"""
-        <div class="recommendation rec-hold">
-            💡 Key Takeaway: {result['recommendation']}
-        </div>
-        """)
-
-    # Table
-    if result.get("table"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <div style="overflow-x:auto;">
-                {result['table']}
-            </div>
+            {('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')}
         </div>
         """)
 
@@ -456,49 +422,35 @@ def format_education_response(result: Dict[str, Any]) -> str:
     html_parts.append(get_intent_badge(result.get("intent", "")))
 
     # Title
-    html_parts.append("<h3>📚 Educational Content</h3>")
+    html_parts.append("<h3>📚 Finance Education</h3>")
 
-    # Direct answer (from preprocessing)
-    if result.get("answer"):
-        html_parts.append(f"""
-        <div class="success-box">
-            <h4>Quick Answer</h4>
-            <p>{result['answer']}</p>
-        </div>
-        """)
+    # Build comprehensive text output combining all available content
+    comprehensive_text = []
 
-    # Executive summary
+    # Start with executive summary or direct answer
     if result.get("executive_summary"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <h4>Overview</h4>
-            <p>{result['executive_summary']}</p>
-        </div>
-        """)
+        comprehensive_text.append(f"<strong>Answer:</strong><br>{result['executive_summary']}")
+    elif result.get("answer"):
+        comprehensive_text.append(f"<strong>Answer:</strong><br>{result['answer']}")
 
-    # Detailed explanation
     if result.get("financial_analysis"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <h4>Detailed Explanation</h4>
-            <p>{result['financial_analysis']}</p>
-        </div>
-        """)
+        comprehensive_text.append(f"<strong>Detailed Explanation:</strong><br>{result['financial_analysis']}")
 
-    # Key takeaways
+    if result.get("investment_outlook"):
+        comprehensive_text.append(f"<strong>Practical Application:</strong><br>{result['investment_outlook']}")
+
     if result.get("recommendation"):
-        html_parts.append(f"""
-        <div class="metric-card">
-            <h4>💡 Key Takeaways</h4>
-            <p>{result['recommendation']}</p>
-        </div>
-        """)
+        comprehensive_text.append(f"<strong>Key Takeaways:</strong><br>{result['recommendation']}")
 
-    # Text summary
-    if result.get("text_summary"):
+    # Fallback to text_summary if nothing else available
+    if not comprehensive_text and result.get("text_summary"):
+        comprehensive_text.append(result['text_summary'])
+
+    # Display as single comprehensive content box
+    if comprehensive_text:
         html_parts.append(f"""
         <div class="metric-card">
-            <p>{result['text_summary']}</p>
+            {('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')}
         </div>
         """)
 
@@ -588,10 +540,28 @@ if "example_query" in st.session_state and st.session_state.example_query:
 else:
     user_input = None
 
-# Chat input
-if not st.session_state.processing:
+# Create input area with stop button
+input_col, stop_col = st.columns([0.95, 0.05])
+
+with input_col:
+    # Chat input - always visible
     if prompt := st.chat_input("Ask about stocks, market trends, or finance concepts...", key="chat_input"):
         user_input = prompt
+
+with stop_col:
+    # Show stop button only when processing
+    if st.session_state.processing:
+        st.markdown('<div class="stop-button">', unsafe_allow_html=True)
+        if st.button("⬛", key="stop_button", help="Stop generation"):
+            st.session_state.stop_generation = True
+            st.session_state.processing = False
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": "⚠️ Analysis was stopped by user.",
+                "is_html": False
+            })
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # Process user input
 if user_input and not st.session_state.processing:
@@ -603,34 +573,46 @@ if user_input and not st.session_state.processing:
 
     # Set processing flag
     st.session_state.processing = True
+    st.session_state.stop_generation = False
+    st.rerun()
 
+# Run pipeline if processing
+if st.session_state.processing and not st.session_state.stop_generation:
     # Show processing indicator
     with st.spinner("🔄 Analyzing your query..."):
         try:
-            # Run the pipeline
-            result = st.session_state.orchestrator.run(user_input)
+            # Get the last user message
+            last_user_message = None
+            for msg in reversed(st.session_state.messages):
+                if msg["role"] == "user":
+                    last_user_message = msg["content"]
+                    break
 
-            # Format response based on intent
-            formatted_response = format_response(result)
+            if last_user_message:
+                # Run the pipeline
+                result = st.session_state.orchestrator.run(last_user_message)
 
-            # Add assistant message to chat
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": formatted_response,
-                "is_html": True,
-                "raw_result": result  # Store for potential download
-            })
+                # Format response based on intent
+                formatted_response = format_response(result)
 
-            # Display assistant response
-            display_message("assistant", formatted_response, is_html=True)
+                # Add assistant message to chat
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": formatted_response,
+                    "is_html": True,
+                    "raw_result": result  # Store for potential download
+                })
 
-            # Display errors if any
-            if result.get("errors"):
-                display_error_message(result["errors"])
+                # Display assistant response
+                display_message("assistant", formatted_response, is_html=True)
 
-            # Display processing time
-            if result.get("processing_time"):
-                st.caption(f"⏱️ Processing time: {result['processing_time']:.2f}s")
+                # Display errors if any
+                if result.get("errors"):
+                    display_error_message(result["errors"])
+
+                # Display processing time
+                if result.get("processing_time"):
+                    st.caption(f"⏱️ Processing time: {result['processing_time']:.2f}s")
 
         except Exception as e:
             error_msg = f"An error occurred: {str(e)}"
@@ -653,7 +635,7 @@ if user_input and not st.session_state.processing:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; font-size: 12px;">
-    <p>Powered by LangGraph, OpenAI GPT-4, Llama 3.1, and FinBERT</p>
+    <p>Powered by LangGraph, Llama 3.1, and FinBERT</p>
     <p>© 2025 Equity Research AI Assistant | Built with Streamlit</p>
 </div>
 """, unsafe_allow_html=True)
