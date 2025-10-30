@@ -275,6 +275,193 @@ def get_ticker_data(tickers: List[str], use_summary: bool = True) -> Dict[str, A
         return fetch_ticker_data.invoke({"tickers": tickers})
 
 
+@tool
+def filter_by_timeframe(data: Dict[str, Any], year: int = None, quarter: int = None) -> Dict[str, Any]:
+    """
+    Filters financial data by specific timeframe (year and/or quarter).
+
+    Args:
+        data: Dictionary containing ticker financial data
+        year: Target year (e.g., 2024)
+        quarter: Target quarter (1-4)
+
+    Returns:
+        Filtered data matching the specified timeframe
+    """
+    filtered = {}
+
+    # Filter earnings reports
+    if data.get("earnings_reports"):
+        filtered["earnings_reports"] = [
+            e for e in data["earnings_reports"]
+            if (year is None or e.get("year") == year) and
+               (quarter is None or e.get("quarter") == quarter)
+        ]
+
+    # Filter earnings surprises
+    if data.get("earnings_surprises"):
+        filtered["earnings_surprises"] = [
+            e for e in data["earnings_surprises"]
+            if (year is None or e.get("year") == year) and
+               (quarter is None or e.get("quarter") == quarter)
+        ]
+
+    # Filter financials reported
+    if data.get("financials_reported"):
+        filtered["financials_reported"] = [
+            f for f in data["financials_reported"]
+            if (year is None or f.get("year") == year) and
+               (quarter is None or f.get("quarter") == quarter)
+        ]
+
+    # Filter insider sentiment by year
+    if data.get("insider_sentiment") and year:
+        filtered["insider_sentiment"] = [
+            i for i in data["insider_sentiment"]
+            if i.get("year") == year
+        ]
+
+    # Keep non-time-series data as-is
+    for key in ["company", "market_data", "basic_financials", "news", "sec_filings"]:
+        if data.get(key):
+            filtered[key] = data[key]
+
+    return filtered
+
+
+def calculate_growth_metrics(current_value: float, previous_value: float) -> float:
+    """
+    Calculate year-over-year or quarter-over-quarter growth rate.
+
+    Args:
+        current_value: Current period value
+        previous_value: Previous period value
+
+    Returns:
+        Growth rate as decimal (e.g., 0.05 for 5% growth)
+    """
+    if previous_value is None or previous_value == 0:
+        return None
+    return (current_value - previous_value) / previous_value
+
+
+def detect_anomalies(data: Dict[str, Any], threshold: float = 0.20) -> Dict[str, List[str]]:
+    """
+    Detect significant anomalies in financial data.
+
+    Args:
+        data: Dictionary containing ticker financial data
+        threshold: Threshold for flagging anomalies (default 20%)
+
+    Returns:
+        Dictionary with 'positive_anomalies' and 'negative_anomalies' lists
+    """
+    anomalies = {
+        "positive_anomalies": [],
+        "negative_anomalies": []
+    }
+
+    # Check earnings surprises
+    if data.get("earnings_surprises") and isinstance(data["earnings_surprises"], list):
+        for surprise in data["earnings_surprises"]:
+            if not isinstance(surprise, dict):
+                continue
+            surprise_pct = surprise.get("surprisePercent")
+            if surprise_pct is not None:
+                if surprise_pct > threshold * 100:
+                    anomalies["positive_anomalies"].append(
+                        f"EPS beat by {surprise_pct:.1f}% in {surprise.get('period', 'unknown period')}"
+                    )
+                elif surprise_pct < -threshold * 100:
+                    anomalies["negative_anomalies"].append(
+                        f"EPS miss by {abs(surprise_pct):.1f}% in {surprise.get('period', 'unknown period')}"
+                    )
+
+    # Check insider sentiment
+    if data.get("insider_sentiment") and isinstance(data["insider_sentiment"], list):
+        for sentiment in data["insider_sentiment"]:
+            if not isinstance(sentiment, dict):
+                continue
+            mspr = sentiment.get("mspr")
+            if mspr is not None and mspr < -0.5:
+                anomalies["negative_anomalies"].append(
+                    f"Heavy insider selling detected (MSPR: {mspr:.2f}) in {sentiment.get('year')}-{sentiment.get('month'):02d}"
+                )
+            elif mspr is not None and mspr > 0.5:
+                anomalies["positive_anomalies"].append(
+                    f"Strong insider buying detected (MSPR: {mspr:.2f}) in {sentiment.get('year')}-{sentiment.get('month'):02d}"
+                )
+
+    # Check valuation metrics
+    if (data.get("basic_financials") and
+        isinstance(data["basic_financials"], dict) and
+        data["basic_financials"].get("metric")):
+        metrics = data["basic_financials"]["metric"]
+        pe_ratio = metrics.get("peBasicExclExtraTTM")
+
+        if pe_ratio is not None and pe_ratio != "N/A":
+            try:
+                pe_ratio = float(pe_ratio)
+                if pe_ratio > 50:
+                    anomalies["negative_anomalies"].append(
+                        f"Elevated P/E ratio of {pe_ratio:.1f} suggests stretched valuation"
+                    )
+                elif pe_ratio < 10 and pe_ratio > 0:
+                    anomalies["positive_anomalies"].append(
+                        f"Low P/E ratio of {pe_ratio:.1f} may indicate undervaluation"
+                    )
+            except (ValueError, TypeError):
+                pass  # Skip if can't convert to float
+
+    return anomalies
+
+
+def normalize_financial_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Normalize and clean financial data to ensure consistent units and handle missing values.
+
+    Args:
+        data: Raw ticker financial data
+
+    Returns:
+        Normalized data with consistent formatting
+    """
+    normalized = data.copy()
+
+    # Normalize revenue to millions (if in different units)
+    if normalized.get("earnings_reports") and isinstance(normalized["earnings_reports"], list):
+        for report in normalized["earnings_reports"]:
+            # Skip if report is not a dict (e.g., error message)
+            if not isinstance(report, dict):
+                continue
+            # Ensure revenue is in consistent units (millions)
+            if report.get("revenueActual"):
+                # Assume values > 1B are in dollars, convert to millions
+                if report["revenueActual"] > 1_000_000_000:
+                    report["revenueActual"] = report["revenueActual"] / 1_000_000
+            if report.get("revenueEstimate"):
+                if report["revenueEstimate"] > 1_000_000_000:
+                    report["revenueEstimate"] = report["revenueEstimate"] / 1_000_000
+
+    # Handle missing values in basic financials
+    if normalized.get("basic_financials") and isinstance(normalized["basic_financials"], dict):
+        if normalized["basic_financials"].get("metric"):
+            metrics = normalized["basic_financials"]["metric"]
+            # Replace None/null with 'N/A' for display purposes
+            for key, value in metrics.items():
+                if value is None:
+                    metrics[key] = "N/A"
+
+    # Ensure market data has all required fields
+    if normalized.get("market_data") and isinstance(normalized["market_data"], dict):
+        required_fields = ["c", "h", "l", "o", "pc"]
+        for field in required_fields:
+            if field not in normalized["market_data"]:
+                normalized["market_data"][field] = None
+
+    return normalized
+
+
 if __name__ == "__main__":
     # Example usage
     test_tickers = ["PDLMF", "PLSE"]

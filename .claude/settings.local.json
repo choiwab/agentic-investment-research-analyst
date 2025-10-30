@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(curl -s http://127.0.0.1:8000/health)",
+      "Bash(curl -s \"http://127.0.0.1:8000/company/AAPL\")",
+      "Bash(curl -s \"http://127.0.0.1:8000/tickers\")",
+      "Bash(curl -s \"http://127.0.0.1:8000/company/AAPJ\")",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(echo $FASTAPI_BASE_URL)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
