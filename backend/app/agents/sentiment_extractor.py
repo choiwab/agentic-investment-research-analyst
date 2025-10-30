@@ -1,10 +1,11 @@
 # sentiment_agent.py
-import re
 import math
+import re
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import torch
-from typing import List, Dict, Any, Optional
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 # for sentence splitting and text cleaning
 _SENT_SPLIT_RE = re.compile(r"(?<=[\.\?!])\s+(?=[A-Z(\[])")
