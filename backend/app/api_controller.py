@@ -1,8 +1,9 @@
+import os
+from typing import List, Optional
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from pymongo import MongoClient
-from dotenv import load_dotenv
-from typing import Optional, List
-import os
 
 load_dotenv()
 
@@ -11,6 +12,23 @@ client = MongoClient(ATLAS_URI)
 db = client["test"]
 
 app = FastAPI(title="Investment Research API", version="1.0.0")
+
+# ===== PEERS =====
+@app.get("/peers/{ticker}")
+def get_peers(ticker: str):
+    """Get peer tickers for a company"""
+    doc = db.peers.find_one({"_id": ticker})
+    if not doc:
+        raise HTTPException(status_code=404, detail="No peers found for this ticker")
+    return {"ticker": ticker, "peers": doc.get("peers", [])}
+
+@app.get("/peers")
+def get_all_peers(limit: int = Query(1000, le=5000)):
+    """Get peers for all tickers"""
+    peers = []
+    for doc in db.peers.find({}, {}).limit(limit):
+        peers.append({"ticker": doc.get("_id"), "peers": doc.get("peers", [])})
+    return {"peers": peers}
 
 # ===== COMPANIES =====
 @app.get("/companies")

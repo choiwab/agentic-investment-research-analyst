@@ -8,7 +8,6 @@ uvicorn
 requests
 beautifulsoup4
 pymongo
-langchain
 huggingface-hub
 transformers
 streamlit
@@ -22,3 +21,9 @@ fpdf2==2.7.6
 matplotlib==3.8.2
 seaborn==0.13.0
 pandas==2.1.4
+torch
+yfinance
+pandas
+numpy
+scipy
+
