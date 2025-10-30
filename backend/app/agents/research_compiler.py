@@ -27,7 +27,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # LangChain imports
-from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentType, tool, initialize_agent, AgentExecutor
 from langchain.tools import BaseTool
@@ -77,31 +76,22 @@ class ResearchCompilerAgent:
         }
     }
 
-    def __init__(self, model: str = "llama3.1", use_openai: bool = False) -> None:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
         """
         Initialize the Research Compiler Agent
 
         Args:
-            model: Model name (default: llama3.1 for Ollama, or gpt-4 for OpenAI)
-            use_openai: Whether to use OpenAI instead of Ollama
+            model: Model name (default: gpt-4o-mini for OpenAI)
         """
         self.callback_handler = PrintCallbackHandler()
 
-        # Choose LLM based on preference
-        if use_openai:
-            self.llm = ChatOpenAI(
-                model="gpt-4",
-                temperature=0.3,
-                streaming=True,
-                callbacks=[self.callback_handler]
-            )
-        else:
-            self.llm = ChatOllama(
-                model=model,
-                temperature=0.3,
-                streaming=True,
-                callbacks=[self.callback_handler]
-            )
+        # Use OpenAI LLM
+        self.llm = ChatOpenAI(
+            model=model,
+            temperature=0.3,
+            streaming=True,
+            callbacks=[self.callback_handler]
+        )
 
         self.memory = SafeConversationMemory(
             memory_key="chat_history",
@@ -1030,7 +1020,7 @@ class ResearchCompilerAgent:
 if __name__ == "__main__":
     # Initialize agent
     print("Initializing Research Compiler Agent...")
-    agent = ResearchCompilerAgent(model="llama3.1", use_openai=False)
+    agent = ResearchCompilerAgent(model="gpt-4o-mini")
 
     # Test 1: Company Analysis (finance-company)
     print("\n" + "="*50)

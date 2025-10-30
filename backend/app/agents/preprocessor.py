@@ -3,7 +3,7 @@ import json
 import re
 
 from dotenv import load_dotenv
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain.output_parsers import StructuredOutputParser
 from langchain.prompts import PromptTemplate
 from langchain.schema import HumanMessage
@@ -18,64 +18,154 @@ load_dotenv()
 
 class PreprocessAgent:
     """
-    Simplified preprocessing agent optimized for Ollama/Llama models.
-    Uses direct prompting instead of REACT agents for better compatibility.
+    Preprocessing agent using OpenAI models.
+    Uses direct prompting for intent classification and entity extraction.
     """
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
         self.model = model
-        self.llm = ChatOllama(
+        self.llm = ChatOpenAI(
             model=model,
             temperature=0
         )
         self.parser = StructuredOutputParser.from_response_schemas(PreprocessModel.response_schema)
 
     def _classify_intent(self, query: str) -> str:
-        """Classify the intent of the query."""
-        prompt = f"""You are a finance query classifier.
+        """Classify the intent of the query using OpenAI with structured output."""
+        from pydantic import BaseModel, Field
+        from typing import Literal
 
-Classify this query into ONE of these intents:
-- "finance-company" - Queries about specific companies/stocks (e.g., "Analyze Tesla", "Apple stock analysis")
-- "finance-market" - Queries about general market/economy (e.g., "inflation trends", "S&P 500 outlook")
-- "finance-education" - Queries asking for definitions/explanations (e.g., "What is P/E ratio?", "Explain EPS")
-- "irrelevant" - Non-finance queries (e.g., "Tell me a joke", "What's the weather?")
+        class IntentClassification(BaseModel):
+            """Intent classification result"""
+            intent: Literal["finance-company", "finance-market", "finance-education", "irrelevant"] = Field(
+                description="The classified intent category"
+            )
+            reasoning: str = Field(
+                description="Brief explanation of why this intent was chosen"
+            )
 
-Query: "{query}"
+        print(f"[DEBUG] Query: {query}")
 
-Respond with ONLY ONE of these exact strings: finance-company, finance-market, finance-education, or irrelevant"""
+        # Create a structured output LLM
+        structured_llm = self.llm.with_structured_output(IntentClassification)
 
-        response = self.llm.invoke([HumanMessage(content=prompt)])
-        intent = response.content.strip().lower()
+        prompt = f"""You are an expert financial query classifier. Analyze the user's query and classify it into ONE of these four categories:
 
-        # Validate intent
-        valid_intents = ["finance-company", "finance-market", "finance-education", "irrelevant"]
-        for valid in valid_intents:
-            if valid in intent:
-                return valid
+**1. finance-company**
+   - Queries about SPECIFIC companies or stocks
+   - Mentions company names, stock tickers, or requests company analysis
+   - Examples:
+     * "Analyze Tesla stock"
+     * "What's Apple's performance?"
+     * "MSFT earnings report"
+     * "Tell me about Amazon's financials"
 
-        return "irrelevant"  # Default fallback
+**2. finance-market**
+   - Queries about GENERAL market trends, economy, or broad financial indicators
+   - Asks about macroeconomic conditions, market indices, economic policies
+   - Examples:
+     * "What are inflation trends?"
+     * "Current state of the economy"
+     * "S&P 500 outlook"
+     * "How are interest rates affecting markets?"
+     * "What's happening with the Fed?"
+
+**3. finance-education**
+   - Queries asking for definitions, explanations, or learning about financial concepts
+   - Contains words like "what is", "explain", "define", "how does", "meaning of"
+   - Examples:
+     * "What is P/E ratio?"
+     * "Explain dividend yield"
+     * "How does compound interest work?"
+     * "Define market capitalization"
+
+**4. irrelevant**
+   - Non-finance related queries
+   - Examples:
+     * "Tell me a joke"
+     * "What's the weather?"
+     * "Recipe for pasta"
+
+User Query: "{query}"
+
+Classify this query and provide your reasoning."""
+
+        try:
+            result = structured_llm.invoke(prompt)
+            intent = result.intent
+            reasoning = result.reasoning
+
+            print(f"[DEBUG] OpenAI Classification: {intent}")
+            print(f"[DEBUG] Reasoning: {reasoning}")
+
+            # Validate the intent is one of the expected values
+            valid_intents = ["finance-company", "finance-market", "finance-education", "irrelevant"]
+            if intent in valid_intents:
+                return intent
+            else:
+                print(f"[WARNING] Unexpected intent '{intent}', defaulting to irrelevant")
+                return "irrelevant"
+
+        except Exception as e:
+            print(f"[ERROR] Intent classification failed: {e}")
+            print(f"[DEBUG] Falling back to irrelevant")
+            return "irrelevant"
 
     def _extract_ticker(self, query: str) -> str:
-        """Extract ticker symbol from query."""
+        """Extract ticker symbol from query using OpenAI with structured output."""
+        from pydantic import BaseModel, Field
+        from typing import Optional
+
+        class TickerExtraction(BaseModel):
+            """Ticker extraction result"""
+            ticker: Optional[str] = Field(
+                description="The stock ticker symbol in uppercase (e.g., TSLA, AAPL), or null if no company mentioned"
+            )
+            company_name: Optional[str] = Field(
+                description="The full company name if identified"
+            )
+
+        # Create a structured output LLM
+        structured_llm = self.llm.with_structured_output(TickerExtraction)
+
         prompt = f"""Extract the stock ticker symbol from this query.
 
-Common examples:
-- "Tesla" or "Tesla stock" → TSLA
-- "Apple" or "Apple Inc" → AAPL
-- "Microsoft" or "MSFT" → MSFT
-- "Amazon" → AMZN
-- "Google" or "Alphabet" → GOOGL
+Common company to ticker mappings:
+- Tesla / Tesla Motors → TSLA
+- Apple / Apple Inc → AAPL
+- Microsoft → MSFT
+- Amazon → AMZN
+- Google / Alphabet → GOOGL
+- Meta / Facebook → META
+- Netflix → NFLX
+- Nvidia → NVDA
+- Berkshire Hathaway → BRK.B
+- JPMorgan / JPMorgan Chase → JPM
 
 Query: "{query}"
 
-Respond with ONLY the ticker symbol (e.g., TSLA, AAPL) or "null" if no company is mentioned."""
+If a company or stock is mentioned, return its ticker symbol in uppercase. If no company is mentioned, return null for ticker."""
 
-        response = self.llm.invoke([HumanMessage(content=prompt)])
-        ticker = response.content.strip().upper()
+        try:
+            result = structured_llm.invoke(prompt)
+            ticker = result.ticker
 
-        if ticker == "NULL" or len(ticker) > 6:
+            print(f"[DEBUG] Ticker extraction: {ticker}")
+            if result.company_name:
+                print(f"[DEBUG] Company identified: {result.company_name}")
+
+            # Validate ticker format
+            if ticker:
+                ticker = ticker.upper().strip()
+                # Valid tickers are 1-5 characters (some have dots like BRK.B)
+                if len(ticker.replace(".", "")) > 0 and len(ticker) <= 6:
+                    return ticker
+
             return None
-        return ticker
+
+        except Exception as e:
+            print(f"[ERROR] Ticker extraction failed: {e}")
+            return None
 
     def _extract_timeframe(self, query: str) -> str:
         """Extract or default timeframe."""
@@ -232,10 +322,10 @@ Answer:"""
 
 if __name__ == "__main__":
     print("=" * 80)
-    print("Testing Simplified Preprocessing Agent with Ollama")
+    print("Testing Preprocessing Agent with OpenAI")
     print("=" * 80)
 
-    agent = PreprocessAgent(model="llama3.1")
+    agent = PreprocessAgent(model="gpt-4o-mini")
 
     # Test 1: Finance-company
     print("\n### Test 1: Finance-company ###")
@@ -251,3 +341,17 @@ if __name__ == "__main__":
     print("\n\n### Test 3: Finance-education ###")
     result3 = agent.run({"query": "What is P/E ratio?"})
     print(f"\nResult: {json.dumps(result3, indent=2)}")
+
+    # Test 4: Finance-market (inflation trends)
+    print("\n\n### Test 4: Finance-market ###")
+    result4 = agent.run({"query": "What are inflation trends"})
+    print(f"\nResult: {json.dumps(result4, indent=2)}")
+    assert result4["intent"] == "finance-market", f"Expected finance-market, got {result4['intent']}"
+    print("✅ Test passed!")
+
+    # Test 5: Finance-market (S&P 500)
+    print("\n\n### Test 5: Finance-market (S&P 500) ###")
+    result5 = agent.run({"query": "What's the S&P 500 outlook?"})
+    print(f"\nResult: {json.dumps(result5, indent=2)}")
+    assert result5["intent"] == "finance-market", f"Expected finance-market, got {result5['intent']}"
+    print("✅ Test passed!")

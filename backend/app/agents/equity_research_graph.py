@@ -125,7 +125,7 @@ def preprocess_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("🔍 Preprocessing node - Classifying intent and extracting metadata")
 
     try:
-        agent = PreprocessAgent(model="llama3.1")
+        agent = PreprocessAgent(model="gpt-4o-mini")
         result = agent.run({"query": state["query"]})
 
         # Update state with preprocessing results
@@ -160,7 +160,7 @@ def news_scraper_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📰 News Scraper node - Analyzing news article")
 
     try:
-        agent = NewsScraperAgent(model="llama3.1")
+        agent = NewsScraperAgent(model="gpt-4o-mini")
 
         # For finance-company, use the URL from preprocessing
         if state.get("intent") == "finance-company" and state.get("url"):
@@ -201,7 +201,7 @@ def metric_extractor_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📊 Metric Extractor node - Analyzing financial metrics")
 
     try:
-        agent = MetricExtractorAgent(model="llama3.1")
+        agent = MetricExtractorAgent(model="gpt-4o-mini")
 
         # Prepare news scraper output for context
         news_context = None
@@ -315,7 +315,7 @@ def research_compiler_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📝 Research Compiler node - Generating final report")
 
     try:
-        agent = ResearchCompilerAgent(model="llama3.1", use_openai=False)
+        agent = ResearchCompilerAgent(model="gpt-4o-mini")
 
         # Prepare state for compiler based on intent
         compiler_input = {

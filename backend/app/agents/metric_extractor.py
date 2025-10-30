@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
 # Agent Setup and Structuring Output
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain.agents import AgentType, initialize_agent, AgentExecutor
 from langchain.tools import BaseTool
 from langchain.output_parsers import StructuredOutputParser
@@ -23,9 +23,9 @@ load_dotenv()
 
 
 class MetricExtractorAgent:
-    def __init__(self, model: str = "llama3.1") -> None:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
         self.callback_handler = PrintCallbackHandler()
-        self.llm = ChatOllama(
+        self.llm = ChatOpenAI(
             model=model,
             temperature=0,
             streaming=True,
@@ -369,7 +369,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("INITIALIZING METRIC EXTRACTOR AGENT")
     print("=" * 80)
-    agent = MetricExtractorAgent(model="llama3.1")
+    agent = MetricExtractorAgent(model="gpt-4o-mini")
     print("✓ Agent initialized successfully\n")
 
     # Get available tickers from the database
