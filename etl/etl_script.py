@@ -21,22 +21,26 @@ if not ATLAS_URI:
     raise RuntimeError("ATLAS_URI is not set. Add it to your .env or environment.")
 finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 
-# client = MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")
-# db = client["test"]
-def get_mongo_client():
-    # Create a new client and connect to the server
-    client = MongoClient(ATLAS_URI, server_api=ServerApi('1'))
-    # Send a ping to confirm a successful connection
-    try:
-        client.admin.command('ping')
-        print("Pinged your deployment. You successfully connected to MongoDB!")
-        return client
-    except Exception as e:
-        print(e)
-
-# Replace the existing client initialization
-client = get_mongo_client()
+# Use local MongoDB for Airflow DAG
+client = MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
 db = client["test"]
+
+# Alternative: Atlas connection (commented out for now)
+# def get_mongo_client():
+#     # Create a new client and connect to the server
+#     client = MongoClient(ATLAS_URI, server_api=ServerApi('1'))
+#     # Send a ping to confirm a successful connection
+#     try:
+#         client.admin.command('ping')
+#         print("Pinged your deployment. You successfully connected to MongoDB!")
+#         return client
+#     except Exception as e:
+#         print(e)
+#         return None
+#
+# client = get_mongo_client()
+# if client:
+#     db = client["test"]
 
 # ---- EXTRACT ----
 def extract_symbols(exchange="US"):
