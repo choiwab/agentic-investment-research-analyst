@@ -322,14 +322,21 @@ class ResearchCompilerAgent:
         try:
             agent_result = self.agent.invoke({"input": synthesis_prompt})
 
-            # Parse the output
-            if isinstance(agent_result['output'], dict):
-                synthesis = agent_result['output']
-            else:
+            # Gracefully handle missing or malformed outputs
+            output_payload = None
+            if isinstance(agent_result, dict):
+                output_payload = agent_result.get('output')
+
+            if isinstance(output_payload, dict):
+                synthesis = output_payload
+            elif isinstance(output_payload, str):
                 try:
-                    synthesis = self.parser.parse(agent_result['output'])
-                except:
+                    synthesis = self.parser.parse(output_payload)
+                except Exception:
                     synthesis = self._create_fallback_synthesis(state, intent)
+            else:
+                # No usable output; fall back
+                synthesis = self._create_fallback_synthesis(state, intent)
 
         except Exception as e:
             logger.error(f"Error in synthesis: {str(e)}")
@@ -380,7 +387,7 @@ class ResearchCompilerAgent:
         Timeframe: {state.get('timeframe', 'Recent')}
         Metrics of Interest: {state.get('metrics', [])}
 
-        Web Search Results: {state.get('outputFromWebSearch', 'No web search data')[:1000]}
+        Web Search Results: {str(state.get('outputFromWebSearch') or 'No web search data')[:1000]}
 
         Please provide:
         1. Executive summary of market conditions
@@ -401,9 +408,9 @@ class ResearchCompilerAgent:
 
         Query: {user_query}
 
-        Web Search Information: {state.get('outputFromWebSearch', '')[:800]}
+        Web Search Information: {str(state.get('outputFromWebSearch') or '')[:800]}
 
-        Additional Context: {state.get('Result', '')[:500]}
+        Additional Context: {str(state.get('Result') or '')[:500]}
 
         Please provide:
         1. Executive summary (clear explanation of the concept)
@@ -809,12 +816,21 @@ class ResearchCompilerAgent:
             table_lines.append(f"| Timeframe | {state.get('timeframe', 'Current')} |")
 
             if "metrics" in state:
-                metrics_str = ", ".join(state["metrics"])
-                table_lines.append(f"| Metrics | {metrics_str} |")
+                metrics_value = state.get("metrics")
+                if isinstance(metrics_value, (list, tuple)):
+                    metrics_str = ", ".join([str(m) for m in metrics_value])
+                elif metrics_value:
+                    metrics_str = str(metrics_value)
+                else:
+                    metrics_str = ""
+                if metrics_str:
+                    table_lines.append(f"| Metrics | {metrics_str} |")
 
             if "outputFromWebSearch" in state:
-                summary = state["outputFromWebSearch"][:100] + "..."
-                table_lines.append(f"| Web Research | {summary} |")
+                web_data = str(state.get("outputFromWebSearch") or "")
+                if web_data:
+                    summary = web_data[:100] + "..."
+                    table_lines.append(f"| Web Research | {summary} |")
 
         elif intent == "finance-education":
             table_lines.append(f"## Educational Content Summary\n")
@@ -861,7 +877,15 @@ class ResearchCompilerAgent:
             summary_parts.append(f"**Market Analysis**\n")
             summary_parts.append(f"Timeframe: {state.get('timeframe', 'Current')}")
             if "metrics" in state:
-                summary_parts.append(f"Focus Areas: {', '.join(state['metrics'])}")
+                metrics_value = state.get("metrics")
+                if isinstance(metrics_value, (list, tuple)):
+                    metrics_str = ", ".join([str(m) for m in metrics_value])
+                elif metrics_value:
+                    metrics_str = str(metrics_value)
+                else:
+                    metrics_str = ""
+                if metrics_str:
+                    summary_parts.append(f"Focus Areas: {metrics_str}")
 
         elif intent == "finance-education":
             summary_parts.append(f"**Educational Summary**\n")

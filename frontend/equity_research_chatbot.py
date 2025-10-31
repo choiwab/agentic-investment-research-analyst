@@ -1,18 +1,10 @@
-"""
-Equity Research Chatbot - Streamlit Interface
 
-A conversational interface for the equity research LangGraph pipeline.
-Supports all intent types: finance-company, finance-market, finance-education, and irrelevant.
-"""
+import os
+import sys
+from pathlib import Path
+from typing import Any, Dict
 
 import streamlit as st
-import sys
-import os
-from pathlib import Path
-from datetime import datetime
-import json
-from typing import Dict, Any
-import markdown
 
 # Add paths for imports (must be BEFORE importing agents)
 project_root = Path(__file__).parent.parent
@@ -364,11 +356,12 @@ def format_company_response(result: Dict[str, Any]) -> str:
 
     # Display as single comprehensive content box
     if comprehensive_text:
-        html_parts.append(f"""
+        content_html = ('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')
+        html_parts.append("""
         <div class="metric-card">
-            {('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')}
+            {content}
         </div>
-        """)
+        """.format(content=content_html))
 
     return "".join(html_parts)
 
@@ -385,7 +378,12 @@ def format_market_response(result: Dict[str, Any]) -> str:
 
     # Timeframe info
     if result.get("timeframe"):
-        html_parts.append(f"<p><strong>Timeframe:</strong> {result['timeframe']} | <strong>Focus Areas:</strong> {', '.join(result.get('metrics', ['General market trends']))}</p>")
+        metrics = result.get("metrics") or ["General market trends"]
+        if isinstance(metrics, (list, tuple)):
+            focus_areas = ", ".join([str(m) for m in metrics])
+        else:
+            focus_areas = str(metrics)
+        html_parts.append(f"<p><strong>Timeframe:</strong> {result['timeframe']} | <strong>Focus Areas:</strong> {focus_areas}</p>")
 
     # Build comprehensive text output combining all available content
     comprehensive_text = []
@@ -405,11 +403,12 @@ def format_market_response(result: Dict[str, Any]) -> str:
 
     # Display as single comprehensive content box
     if comprehensive_text:
-        html_parts.append(f"""
+        content_html = ('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')
+        html_parts.append("""
         <div class="metric-card">
-            {('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')}
+            {content}
         </div>
-        """)
+        """.format(content=content_html))
 
     return "".join(html_parts)
 
@@ -448,11 +447,12 @@ def format_education_response(result: Dict[str, Any]) -> str:
 
     # Display as single comprehensive content box
     if comprehensive_text:
-        html_parts.append(f"""
+        content_html = ('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')
+        html_parts.append("""
         <div class="metric-card">
-            {('<br><br>'.join(comprehensive_text)).replace('\n', '<br>')}
+            {content}
         </div>
-        """)
+        """.format(content=content_html))
 
     return "".join(html_parts)
 
@@ -568,8 +568,7 @@ if user_input and not st.session_state.processing:
     # Add user message to chat
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Display user message
-    display_message("user", user_input)
+    # Defer rendering to history on next rerun
 
     # Set processing flag
     st.session_state.processing = True
@@ -603,8 +602,7 @@ if st.session_state.processing and not st.session_state.stop_generation:
                     "raw_result": result  # Store for potential download
                 })
 
-                # Display assistant response
-                display_message("assistant", formatted_response, is_html=True)
+                # Defer rendering to history on next rerun
 
                 # Display errors if any
                 if result.get("errors"):
