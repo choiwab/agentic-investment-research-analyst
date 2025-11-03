@@ -45,6 +45,37 @@ app.add_middleware(
 class ResearchRequest(BaseModel):
     query: str
 
+# ===== HEALTH CHECK ENDPOINTS =====
+@app.get("/")
+async def root():
+    """Root endpoint - confirms API is running"""
+    return {
+        "status": "online",
+        "message": "Investment Research API is running",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "research": "/api/research (POST)",
+            "outputs": "/outputs/{filename}",
+        }
+    }
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        # Test MongoDB connection
+        client.admin.command('ping')
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
+    return {
+        "status": "healthy",
+        "database": db_status,
+        "version": "1.0.0"
+    }
+
 # ===== EQUITY RESEARCH ENDPOINT =====
 @app.post("/api/research")
 async def run_equity_research(request: ResearchRequest):
