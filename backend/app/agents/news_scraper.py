@@ -1,5 +1,5 @@
 # Agent Setup and Structuring Output
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain.agents import AgentType, tool, initialize_agent, AgentExecutor
 from langchain.tools import BaseTool
 from langchain.output_parsers import StructuredOutputParser
@@ -14,12 +14,12 @@ from utils.model_schema import NewsModel
 from utils.conversation_buffer_safe import SafeConversationMemory
 
 class NewsScraperAgent:
-    def __init__(self, model : str) -> None:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
         self.callback_handler = PrintCallbackHandler()
-        self.llm = ChatOllama(model = model, temperature = 0, streaming = True, callbacks = [self.callback_handler])
+        self.llm = ChatOpenAI(model=model, temperature=0, streaming=True, callbacks=[self.callback_handler])
         self.memory = SafeConversationMemory(
-            memory_key = "chat_history",
-            return_messages = True
+            memory_key="chat_history",
+            return_messages=True
         )
         self.parser = StructuredOutputParser.from_response_schemas(NewsModel.response_schema)
         self.agent = self.build_agent()
@@ -89,8 +89,8 @@ class NewsScraperAgent:
         return parsed_result
 
 if __name__ == "__main__":
-    agent = NewsScraperAgent(model = "llama3.1")
-    state = {'url' : "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"}   # Example
+    agent = NewsScraperAgent(model="gpt-4o-mini")
+    state = {'url': "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"}   # Example
     results = agent.run(state)
     print('Qualitative Summary: ', results['qualitative_summary'])
     print("\n")

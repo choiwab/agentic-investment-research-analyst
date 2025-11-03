@@ -4,7 +4,7 @@ from agents.utils.tools import web_search
 from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def _search_node(state: Dict[str, Any]) -> Dict[str, Any]:

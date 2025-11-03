@@ -1,0 +1,215 @@
+.message {
+  display: flex;
+  gap: var(--spacing-md);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: var(--background-tertiary);
+}
+
+.message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-message {
+  flex-direction: row-reverse;
+}
+
+.user-message .message-avatar {
+  background: var(--primary-color);
+}
+
+.user-message .message-content {
+  text-align: right;
+}
+
+.user-text {
+  background: var(--primary-color);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  display: inline-block;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.assistant-message .message-content {
+  background: var(--background-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--primary-color);
+}
+
+.error-message .message-content {
+  border-left-color: var(--error-color);
+  background: rgba(255, 82, 82, 0.1);
+}
+
+/* Markdown styling */
+.message-content h1 {
+  font-size: 1.8rem;
+  margin: var(--spacing-md) 0;
+  color: var(--primary-color);
+}
+
+.message-content h2 {
+  font-size: 1.5rem;
+  margin: var(--spacing-md) 0;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: var(--spacing-sm);
+}
+
+.message-content h3 {
+  font-size: 1.2rem;
+  margin: var(--spacing-sm) 0;
+  color: var(--secondary-color);
+}
+
+.message-content p {
+  margin: var(--spacing-sm) 0;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.message-content ul,
+.message-content ol {
+  margin: var(--spacing-sm) 0;
+  padding-left: var(--spacing-lg);
+}
+
+.message-content li {
+  margin: var(--spacing-xs) 0;
+  line-height: 1.6;
+}
+
+.message-content code {
+  background: var(--background-tertiary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9em;
+  color: var(--primary-color);
+}
+
+.message-content pre {
+  background: var(--background-tertiary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin: var(--spacing-md) 0;
+}
+
+.message-content pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.message-content blockquote {
+  border-left: 4px solid var(--primary-color);
+  padding-left: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.message-content a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.message-content a:hover {
+  border-bottom-color: var(--secondary-color);
+}
+
+.message-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+}
+
+.message-content th,
+.message-content td {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.message-content th {
+  background: var(--background-tertiary);
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.message-content tr:hover {
+  background: var(--background-tertiary);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin: var(--spacing-md) 0;
+}
+
+.message-content hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: var(--spacing-lg) 0;
+}
+
+.message-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .message {
+    gap: var(--spacing-sm);
+  }
+
+  .message-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+  }
+
+  .user-text {
+    max-width: 90%;
+  }
+
+  .message-content h1 {
+    font-size: 1.4rem;
+  }
+
+  .message-content h2 {
+    font-size: 1.2rem;
+  }
+}

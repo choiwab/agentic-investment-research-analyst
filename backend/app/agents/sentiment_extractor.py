@@ -1,10 +1,11 @@
 # sentiment_agent.py
-import re
 import math
+import re
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import torch
-from typing import List, Dict, Any, Optional
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 # for sentence splitting and text cleaning
 _SENT_SPLIT_RE = re.compile(r"(?<=[\.\?!])\s+(?=[A-Z(\[])")
@@ -140,6 +141,7 @@ class SentimentAnalysisAgent:
 article_text = "FixStop at Alafaya has earned a strong reputation in Orlando for delivering quick, reliable repairs combined with competitive pricing, making it a preferred destination for residents seeking expert electronic device servicing. FixStop at Alafaya has earned a strong reputation in Orlando for delivering quick, reliable repairs combined with competitive pricing, making it a preferred destination for residents seeking expert electronic device servicing. Located conveniently in the Shoppes at Eastwood Publix Plaza, this repair shop has become synonymous with quality and efficiency, offering a comprehensive range of services that cover everything from smartphones to computers and beyond. Fast and Expert Repair Services. One of the key strengths of FixStop at Alafaya is its commitment to fast turnaround times without compromising on quality. Customers frequently praise the shop for completing repairs within 24 hours, with some services such as iPhone screen replacements done in under an hour. This rapid service is complemented by the expertise of certified technicians who handle even the most complex repairs, including micro-soldering and board-level fixes under a microscope. This combination of speed and technical skill ensures that clients receive dependable repairs that restore their devices to optimal functionality quickly. In addition to repairs, FixStop at Alafaya also caters to customers interested in building or upgrading a custom PC. This service involves assembling personalized desktop computers tailored to specific needs, whether for gaming, professional work, or general use. The technicians assist with component selection, installation, and configuration to ensure optimal performance and reliability. This capability reflects the shop's comprehensive understanding of computer hardware and its commitment to meeting diverse customer requirements."
 
 
-agent = SentimentAnalysisAgent()
-out = agent.run(article_text, meta={"ticker":"AAPL","source":"Reuters"}, entities=["Apple","AAPL"])
-print(out["sentiment"], out["probs"])
+# Commented out to prevent loading model at import time
+# agent = SentimentAnalysisAgent()
+# out = agent.run(article_text, meta={"ticker":"AAPL","source":"Reuters"}, entities=["Apple","AAPL"])
+# print(out["sentiment"], out["probs"])

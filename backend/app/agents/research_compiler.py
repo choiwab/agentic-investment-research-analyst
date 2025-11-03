@@ -27,7 +27,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # LangChain imports
-from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentType, tool, initialize_agent, AgentExecutor
 from langchain.tools import BaseTool
@@ -77,31 +76,22 @@ class ResearchCompilerAgent:
         }
     }
 
-    def __init__(self, model: str = "llama3.1", use_openai: bool = False) -> None:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
         """
         Initialize the Research Compiler Agent
 
         Args:
-            model: Model name (default: llama3.1 for Ollama, or gpt-4 for OpenAI)
-            use_openai: Whether to use OpenAI instead of Ollama
+            model: Model name (default: gpt-4o-mini for OpenAI)
         """
         self.callback_handler = PrintCallbackHandler()
 
-        # Choose LLM based on preference
-        if use_openai:
-            self.llm = ChatOpenAI(
-                model="gpt-4",
-                temperature=0.3,
-                streaming=True,
-                callbacks=[self.callback_handler]
-            )
-        else:
-            self.llm = ChatOllama(
-                model=model,
-                temperature=0.3,
-                streaming=True,
-                callbacks=[self.callback_handler]
-            )
+        # Use OpenAI LLM
+        self.llm = ChatOpenAI(
+            model=model,
+            temperature=0.3,
+            streaming=True,
+            callbacks=[self.callback_handler]
+        )
 
         self.memory = SafeConversationMemory(
             memory_key="chat_history",
@@ -332,14 +322,32 @@ class ResearchCompilerAgent:
         try:
             agent_result = self.agent.invoke({"input": synthesis_prompt})
 
-            # Parse the output
-            if isinstance(agent_result['output'], dict):
-                synthesis = agent_result['output']
+            # Gracefully handle missing or malformed outputs
+            output_payload = None
+            if isinstance(agent_result, dict):
+                output_payload = agent_result.get('output')
+
+            if isinstance(output_payload, dict):
+                synthesis = output_payload
+            elif isinstance(output_payload, str):
+                # For market analysis, the agent returns plain text, so wrap it in a dict
+                if intent == "finance-market":
+                    synthesis = {
+                        "executive_summary": output_payload,
+                        "financial_analysis": "",
+                        "news_sentiment_analysis": "",
+                        "investment_outlook": "",
+                        "recommendation": ""
+                    }
+                    logger.info(f"Using agent's text output for market analysis ({len(output_payload)} chars)")
+                else:
+                    try:
+                        synthesis = self.parser.parse(output_payload)
+                    except Exception:
+                        synthesis = self._create_fallback_synthesis(state, intent)
             else:
-                try:
-                    synthesis = self.parser.parse(agent_result['output'])
-                except:
-                    synthesis = self._create_fallback_synthesis(state, intent)
+                # No usable output; fall back
+                synthesis = self._create_fallback_synthesis(state, intent)
 
         except Exception as e:
             logger.error(f"Error in synthesis: {str(e)}")
@@ -390,7 +398,7 @@ class ResearchCompilerAgent:
         Timeframe: {state.get('timeframe', 'Recent')}
         Metrics of Interest: {state.get('metrics', [])}
 
-        Web Search Results: {state.get('outputFromWebSearch', 'No web search data')[:1000]}
+        Web Search Results: {str(state.get('outputFromWebSearch') or 'No web search data')[:1000]}
 
         Please provide:
         1. Executive summary of market conditions
@@ -411,9 +419,9 @@ class ResearchCompilerAgent:
 
         Query: {user_query}
 
-        Web Search Information: {state.get('outputFromWebSearch', '')[:800]}
+        Web Search Information: {str(state.get('outputFromWebSearch') or '')[:800]}
 
-        Additional Context: {state.get('Result', '')[:500]}
+        Additional Context: {str(state.get('Result') or '')[:500]}
 
         Please provide:
         1. Executive summary (clear explanation of the concept)
@@ -819,12 +827,64 @@ class ResearchCompilerAgent:
             table_lines.append(f"| Timeframe | {state.get('timeframe', 'Current')} |")
 
             if "metrics" in state:
-                metrics_str = ", ".join(state["metrics"])
-                table_lines.append(f"| Metrics | {metrics_str} |")
+                metrics_value = state.get("metrics")
+                if isinstance(metrics_value, (list, tuple)):
+                    metrics_str = ", ".join([str(m) for m in metrics_value])
+                elif metrics_value:
+                    metrics_str = str(metrics_value)
+                else:
+                    metrics_str = ""
+                if metrics_str:
+                    table_lines.append(f"| Metrics | {metrics_str} |")
 
             if "outputFromWebSearch" in state:
-                summary = state["outputFromWebSearch"][:100] + "..."
-                table_lines.append(f"| Web Research | {summary} |")
+                web_data = state.get("outputFromWebSearch")
+                if web_data:
+                    # Try to parse and extract URLs
+                    try:
+                        import json
+                        import ast
+                        logger.info(f"[DEBUG] Web data type: {type(web_data)}, value: {str(web_data)[:200]}")
+
+                        # If it's a dict, use it directly
+                        if isinstance(web_data, dict):
+                            results = web_data.get("results", [])
+                            logger.info(f"[DEBUG] Dict path - results: {len(results)} items")
+                        # If it's a string, try to parse it
+                        elif isinstance(web_data, str):
+                            # Try ast.literal_eval first (safer for Python dict strings)
+                            try:
+                                parsed = ast.literal_eval(web_data)
+                                results = parsed.get("results", [])
+                                logger.info(f"[DEBUG] AST path - parsed results: {len(results)} items")
+                            except:
+                                # Fallback to JSON parsing with quote replacement
+                                web_data_json = web_data.replace("'", '"')
+                                parsed = json.loads(web_data_json)
+                                results = parsed.get("results", [])
+                                logger.info(f"[DEBUG] JSON path - parsed results: {len(results)} items")
+                        else:
+                            results = []
+                            logger.info(f"[DEBUG] Unknown type path")
+
+                        # Extract URLs from results
+                        if results and len(results) > 0:
+                            urls = [item.get("url", "") for item in results if item.get("url")]
+                            logger.info(f"[DEBUG] Extracted {len(urls)} URLs")
+                            if urls:
+                                # Format URLs cleanly
+                                url_links = ", ".join([f"[Source {i+1}]({url})" for i, url in enumerate(urls[:5])])  # Show max 5 URLs
+                                table_lines.append(f"| Web Research | {url_links} |")
+                                logger.info(f"[DEBUG] Added URL links to table")
+                            else:
+                                table_lines.append(f"| Web Research | No URLs available |")
+                        else:
+                            table_lines.append(f"| Web Research | No results |")
+                    except Exception as e:
+                        # Fallback: show truncated version
+                        logger.error(f"[DEBUG] Exception parsing web data: {e}")
+                        summary = str(web_data)[:100] + "..."
+                        table_lines.append(f"| Web Research | {summary} |")
 
         elif intent == "finance-education":
             table_lines.append(f"## Educational Content Summary\n")
@@ -869,9 +929,29 @@ class ResearchCompilerAgent:
 
         elif intent == "finance-market":
             summary_parts.append(f"**Market Analysis**\n")
-            summary_parts.append(f"Timeframe: {state.get('timeframe', 'Current')}")
-            if "metrics" in state:
-                summary_parts.append(f"Focus Areas: {', '.join(state['metrics'])}")
+
+            # Use actual synthesis data if available
+            exec_summary = synthesis.get("executive_summary", "")
+            financial_analysis = synthesis.get("financial_analysis", "")
+            news_sentiment = synthesis.get("news_sentiment_analysis", "")
+            investment_outlook = synthesis.get("investment_outlook", "")
+            recommendation = synthesis.get("recommendation", "")
+
+            # Build comprehensive market summary from synthesis
+            if exec_summary:
+                summary_parts.append(f"\n{exec_summary}")
+
+            if financial_analysis:
+                summary_parts.append(f"\n**Market Analysis:**\n{financial_analysis}")
+
+            if news_sentiment:
+                summary_parts.append(f"\n**Market Sentiment:**\n{news_sentiment}")
+
+            if investment_outlook:
+                summary_parts.append(f"\n**Outlook:**\n{investment_outlook}")
+
+            if recommendation:
+                summary_parts.append(f"\n**Recommendation:** {recommendation}")
 
         elif intent == "finance-education":
             summary_parts.append(f"**Educational Summary**\n")
@@ -1030,7 +1110,7 @@ class ResearchCompilerAgent:
 if __name__ == "__main__":
     # Initialize agent
     print("Initializing Research Compiler Agent...")
-    agent = ResearchCompilerAgent(model="llama3.1", use_openai=False)
+    agent = ResearchCompilerAgent(model="gpt-4o-mini")
 
     # Test 1: Company Analysis (finance-company)
     print("\n" + "="*50)
