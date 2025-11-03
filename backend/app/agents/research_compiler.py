@@ -330,10 +330,21 @@ class ResearchCompilerAgent:
             if isinstance(output_payload, dict):
                 synthesis = output_payload
             elif isinstance(output_payload, str):
-                try:
-                    synthesis = self.parser.parse(output_payload)
-                except Exception:
-                    synthesis = self._create_fallback_synthesis(state, intent)
+                # For market analysis, the agent returns plain text, so wrap it in a dict
+                if intent == "finance-market":
+                    synthesis = {
+                        "executive_summary": output_payload,
+                        "financial_analysis": "",
+                        "news_sentiment_analysis": "",
+                        "investment_outlook": "",
+                        "recommendation": ""
+                    }
+                    logger.info(f"Using agent's text output for market analysis ({len(output_payload)} chars)")
+                else:
+                    try:
+                        synthesis = self.parser.parse(output_payload)
+                    except Exception:
+                        synthesis = self._create_fallback_synthesis(state, intent)
             else:
                 # No usable output; fall back
                 synthesis = self._create_fallback_synthesis(state, intent)
@@ -827,10 +838,53 @@ class ResearchCompilerAgent:
                     table_lines.append(f"| Metrics | {metrics_str} |")
 
             if "outputFromWebSearch" in state:
-                web_data = str(state.get("outputFromWebSearch") or "")
+                web_data = state.get("outputFromWebSearch")
                 if web_data:
-                    summary = web_data[:100] + "..."
-                    table_lines.append(f"| Web Research | {summary} |")
+                    # Try to parse and extract URLs
+                    try:
+                        import json
+                        import ast
+                        logger.info(f"[DEBUG] Web data type: {type(web_data)}, value: {str(web_data)[:200]}")
+
+                        # If it's a dict, use it directly
+                        if isinstance(web_data, dict):
+                            results = web_data.get("results", [])
+                            logger.info(f"[DEBUG] Dict path - results: {len(results)} items")
+                        # If it's a string, try to parse it
+                        elif isinstance(web_data, str):
+                            # Try ast.literal_eval first (safer for Python dict strings)
+                            try:
+                                parsed = ast.literal_eval(web_data)
+                                results = parsed.get("results", [])
+                                logger.info(f"[DEBUG] AST path - parsed results: {len(results)} items")
+                            except:
+                                # Fallback to JSON parsing with quote replacement
+                                web_data_json = web_data.replace("'", '"')
+                                parsed = json.loads(web_data_json)
+                                results = parsed.get("results", [])
+                                logger.info(f"[DEBUG] JSON path - parsed results: {len(results)} items")
+                        else:
+                            results = []
+                            logger.info(f"[DEBUG] Unknown type path")
+
+                        # Extract URLs from results
+                        if results and len(results) > 0:
+                            urls = [item.get("url", "") for item in results if item.get("url")]
+                            logger.info(f"[DEBUG] Extracted {len(urls)} URLs")
+                            if urls:
+                                # Format URLs cleanly
+                                url_links = ", ".join([f"[Source {i+1}]({url})" for i, url in enumerate(urls[:5])])  # Show max 5 URLs
+                                table_lines.append(f"| Web Research | {url_links} |")
+                                logger.info(f"[DEBUG] Added URL links to table")
+                            else:
+                                table_lines.append(f"| Web Research | No URLs available |")
+                        else:
+                            table_lines.append(f"| Web Research | No results |")
+                    except Exception as e:
+                        # Fallback: show truncated version
+                        logger.error(f"[DEBUG] Exception parsing web data: {e}")
+                        summary = str(web_data)[:100] + "..."
+                        table_lines.append(f"| Web Research | {summary} |")
 
         elif intent == "finance-education":
             table_lines.append(f"## Educational Content Summary\n")
@@ -875,17 +929,29 @@ class ResearchCompilerAgent:
 
         elif intent == "finance-market":
             summary_parts.append(f"**Market Analysis**\n")
-            summary_parts.append(f"Timeframe: {state.get('timeframe', 'Current')}")
-            if "metrics" in state:
-                metrics_value = state.get("metrics")
-                if isinstance(metrics_value, (list, tuple)):
-                    metrics_str = ", ".join([str(m) for m in metrics_value])
-                elif metrics_value:
-                    metrics_str = str(metrics_value)
-                else:
-                    metrics_str = ""
-                if metrics_str:
-                    summary_parts.append(f"Focus Areas: {metrics_str}")
+
+            # Use actual synthesis data if available
+            exec_summary = synthesis.get("executive_summary", "")
+            financial_analysis = synthesis.get("financial_analysis", "")
+            news_sentiment = synthesis.get("news_sentiment_analysis", "")
+            investment_outlook = synthesis.get("investment_outlook", "")
+            recommendation = synthesis.get("recommendation", "")
+
+            # Build comprehensive market summary from synthesis
+            if exec_summary:
+                summary_parts.append(f"\n{exec_summary}")
+
+            if financial_analysis:
+                summary_parts.append(f"\n**Market Analysis:**\n{financial_analysis}")
+
+            if news_sentiment:
+                summary_parts.append(f"\n**Market Sentiment:**\n{news_sentiment}")
+
+            if investment_outlook:
+                summary_parts.append(f"\n**Outlook:**\n{investment_outlook}")
+
+            if recommendation:
+                summary_parts.append(f"\n**Recommendation:** {recommendation}")
 
         elif intent == "finance-education":
             summary_parts.append(f"**Educational Summary**\n")

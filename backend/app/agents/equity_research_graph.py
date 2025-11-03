@@ -39,7 +39,7 @@ from agents.metric_extractor import MetricExtractorAgent
 from agents.sentiment_extractor import SentimentAnalysisAgent
 from agents.research_compiler import ResearchCompilerAgent
 
-load_dotenv()
+load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

@@ -18,7 +18,7 @@ from utils.sec_risk_analyzer import SECRiskAnalyzer
 from news_scraper import NewsScraperAgent
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 def convert_numpy_types(obj):
     if isinstance(obj, np.integer):

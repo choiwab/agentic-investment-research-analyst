@@ -14,7 +14,7 @@ from utils.tools import fetch_peers, web_search
 from utils.fetch_ticker_url import fetch_ticker_url
 from utils.model_schema import PreprocessModel
 
-load_dotenv()
+load_dotenv(override=True)
 
 class PreprocessAgent:
     """

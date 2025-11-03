@@ -3,7 +3,7 @@ import requests
 from dotenv import load_dotenv
 from langchain.tools import tool
 
-load_dotenv()
+load_dotenv(override=True)
 
 FASTAPI_BASE_URL = os.getenv("FASTAPI_BASE_URL", "http://127.0.0.1:8000")
 

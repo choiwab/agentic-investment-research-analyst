@@ -19,7 +19,7 @@ from utils.tools import (
     detect_anomalies
 )
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 class MetricExtractorAgent:

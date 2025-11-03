@@ -1,13 +1,24 @@
+"""
+Equity Research Chatbot - Streamlit Interface
 
-import os
-import sys
-from pathlib import Path
-from typing import Any, Dict
+A conversational interface for the equity research LangGraph pipeline.
+Supports all intent types: finance-company, finance-market, finance-education, and irrelevant.
+"""
 
 import streamlit as st
+import sys
+from pathlib import Path
+from datetime import datetime
+import json
+import logging
+import io
+from typing import Dict, Any
 
 # Add paths for imports (must be BEFORE importing agents)
-project_root = Path(__file__).parent.parent
+# Get the absolute path to this file, then go up to project root
+current_file = Path(__file__).resolve()
+frontend_dir = current_file.parent
+project_root = frontend_dir.parent
 backend_app_path = project_root / "backend" / "app"
 backend_agents_path = backend_app_path / "agents"
 
@@ -16,10 +27,8 @@ for path in [str(backend_app_path), str(backend_agents_path)]:
     if path not in sys.path:
         sys.path.insert(0, path)
 
-# Change to project root
-os.chdir(str(project_root))
-
 # Import the orchestrator (after path is set)
+# Note: We don't change the working directory to avoid confusing Streamlit's file watcher
 from agents.equity_research_graph import EquityResearchOrchestrator
 
 # ============================================================================
@@ -188,6 +197,88 @@ st.markdown("""
     .stop-button button:hover {
         background-color: #555 !important;
         border-color: #666 !important;
+    }
+
+    /* Progress container */
+    .progress-container {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 15px 0;
+    }
+
+    /* Agent step styling */
+    .agent-step {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.03);
+        border-left: 4px solid #666;
+    }
+
+    .agent-step.pending {
+        border-left-color: #666;
+        opacity: 0.5;
+    }
+
+    .agent-step.processing {
+        border-left-color: #2196F3;
+        background-color: rgba(33, 150, 243, 0.1);
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .agent-step.completed {
+        border-left-color: #4CAF50;
+        background-color: rgba(76, 175, 80, 0.05);
+    }
+
+    .agent-step.error {
+        border-left-color: #f44336;
+        background-color: rgba(244, 67, 54, 0.1);
+    }
+
+    .agent-step-icon {
+        font-size: 24px;
+        margin-right: 15px;
+        min-width: 30px;
+    }
+
+    .agent-step-content {
+        flex: 1;
+    }
+
+    .agent-step-title {
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .agent-step-detail {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    /* Spinner animation */
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #2196F3;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -515,6 +606,55 @@ def display_error_message(errors: list):
         st.markdown(error_html, unsafe_allow_html=True)
 
 
+def create_progress_display(pipeline_steps: dict) -> str:
+    """
+    Create HTML for pipeline progress display
+
+    Args:
+        pipeline_steps: Dict with structure:
+            {
+                'step_name': {
+                    'status': 'pending' | 'processing' | 'completed' | 'error',
+                    'icon': '🔍',
+                    'title': 'Preprocessing',
+                    'detail': 'Classifying intent...'
+                }
+            }
+    """
+    html = '<div class="progress-container">'
+    html += '<h4 style="margin-top: 0;">📊 Pipeline Progress</h4>'
+
+    for step_name, step_info in pipeline_steps.items():
+        status = step_info.get('status', 'pending')
+        icon = step_info.get('icon', '⚙️')
+        title = step_info.get('title', step_name)
+        detail = step_info.get('detail', '')
+
+        # Add spinner for processing status
+        if status == 'processing':
+            status_icon = '<div class="spinner"></div>'
+        elif status == 'completed':
+            status_icon = '✅'
+        elif status == 'error':
+            status_icon = '❌'
+        else:  # pending
+            status_icon = '⏸️'
+
+        html += f'''
+        <div class="agent-step {status}">
+            <div class="agent-step-icon">{icon}</div>
+            <div class="agent-step-content">
+                <div class="agent-step-title">{title}</div>
+                {f'<div class="agent-step-detail">{detail}</div>' if detail else ''}
+            </div>
+            <div class="agent-step-icon">{status_icon}</div>
+        </div>
+        '''
+
+    html += '</div>'
+    return html
+
+
 # ============================================================================
 # MAIN CHAT INTERFACE
 # ============================================================================
@@ -601,8 +741,6 @@ if st.session_state.processing and not st.session_state.stop_generation:
                     "is_html": True,
                     "raw_result": result  # Store for potential download
                 })
-
-                # Defer rendering to history on next rerun
 
                 # Display errors if any
                 if result.get("errors"):

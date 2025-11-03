@@ -1,0 +1,15 @@
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .message-list {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+}
