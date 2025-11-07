@@ -22,7 +22,7 @@ class PreprocessAgent:
     Uses direct prompting for intent classification and entity extraction.
     """
 
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, model: str = "gpt-5-nano") -> None:
         self.model = model
         self.llm = ChatOpenAI(
             model=model,
@@ -325,7 +325,7 @@ if __name__ == "__main__":
     print("Testing Preprocessing Agent with OpenAI")
     print("=" * 80)
 
-    agent = PreprocessAgent(model="gpt-4o-mini")
+    agent = PreprocessAgent(model="gpt-5-nano")
 
     # Test 1: Finance-company
     print("\n### Test 1: Finance-company ###")
