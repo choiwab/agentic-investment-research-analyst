@@ -1,29 +1,30 @@
 import json
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from dotenv import load_dotenv
+from langchain.agents import AgentExecutor, AgentType, initialize_agent
+from langchain.output_parsers import StructuredOutputParser
+from langchain.tools import BaseTool
 
 # Agent Setup and Structuring Output
 from langchain_openai import ChatOpenAI
-from langchain.agents import AgentType, initialize_agent, AgentExecutor
-from langchain.tools import BaseTool
-from langchain.output_parsers import StructuredOutputParser
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
-from utils.model_schema import MetricModel
 from utils.conversation_buffer_safe import SafeConversationMemory
+from utils.model_schema import MetricModel
 from utils.tools import (
+    detect_anomalies,
     fetch_ticker_data,
     fetch_ticker_summary,
     normalize_financial_data,
-    detect_anomalies
 )
 
 load_dotenv(override=True)
 
 
 class MetricExtractorAgent:
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, model: str = "gpt-5-nano") -> None:
         self.callback_handler = PrintCallbackHandler()
         self.llm = ChatOpenAI(
             model=model,
@@ -306,11 +307,11 @@ Extract and structure all metrics according to the required JSON format.
 
 if __name__ == "__main__":
     import os
+
     import requests
 
     # Check prerequisites
     fastapi_url = os.getenv("FASTAPI_BASE_URL", "http://127.0.0.1:8000")
-    ollama_url = "http://localhost:11434"
 
     print("=" * 80)
     print("PREREQUISITE CHECKS")
@@ -335,41 +336,19 @@ if __name__ == "__main__":
         print(f"✗ Error checking backend: {e}")
         exit(1)
 
-    # Check Ollama server
-    try:
-        response = requests.get(f"{ollama_url}/api/tags", timeout=2)
-        if response.status_code == 200:
-            models = response.json().get("models", [])
-            model_names = [m.get("name", "") for m in models]
-            print(f"✓ Ollama is running at {ollama_url}")
-
-            # Check if llama3.1 is available
-            if any("llama3.1" in name for name in model_names):
-                print(f"✓ llama3.1 model is available")
-            else:
-                print(f"⚠ llama3.1 model not found. Available models: {', '.join(model_names[:3])}")
-                print(f"\nTo install llama3.1, run:")
-                print(f"  ollama pull llama3.1")
-        else:
-            print(f"✗ Ollama returned status {response.status_code}")
-            exit(1)
-    except requests.exceptions.ConnectionError:
-        print(f"✗ Cannot connect to Ollama at {ollama_url}")
-        print(f"\nOllama is required to run the LLM agent.")
-        print(f"Please start Ollama:")
-        print(f"  1. Install from https://ollama.ai")
-        print(f"  2. Run: ollama serve")
-        print(f"  3. Pull the model: ollama pull llama3.1")
-        exit(1)
-    except Exception as e:
-        print(f"✗ Error checking Ollama: {e}")
-        exit(1)
+    # Check OpenAI API key
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        print(f"OPENAI_API_KEY not found in environment variables")
+        print(f"Please set OPENAI_API_KEY in your .env file or environment")
+    else:
+        print(f"✓ OpenAI API key is configured")
 
     # Initialize agent
     print("\n" + "=" * 80)
     print("INITIALIZING METRIC EXTRACTOR AGENT")
     print("=" * 80)
-    agent = MetricExtractorAgent(model="gpt-4o-mini")
+    agent = MetricExtractorAgent(model="gpt-5-nano")
     print("✓ Agent initialized successfully\n")
 
     # Get available tickers from the database

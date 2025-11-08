@@ -11,13 +11,13 @@ Pipeline routes:
 4. finance-education: preprocessing → research_compiler (uses answer from preprocessing)
 """
 
-import os
-import sys
-from pathlib import Path
-from typing import TypedDict, Annotated, Literal, Optional, Dict, Any, List
-from datetime import datetime
 import json
 import logging
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Annotated, Any, Dict, List, Literal, Optional, TypedDict
 
 # Add paths so agents can import utils
 backend_app_path = Path(__file__).parent.parent
@@ -28,16 +28,16 @@ for path in [str(backend_app_path), str(backend_agents_path)]:
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from dotenv import load_dotenv
-from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
+from agents.metric_extractor import MetricExtractorAgent
+from agents.news_scraper import NewsScraperAgent
 
 # Import agents (now that path is set)
 from agents.preprocessor import PreprocessAgent
-from agents.news_scraper import NewsScraperAgent
-from agents.metric_extractor import MetricExtractorAgent
-from agents.sentiment_extractor import SentimentAnalysisAgent
 from agents.research_compiler import ResearchCompilerAgent
+from agents.sentiment_extractor import SentimentAnalysisAgent
+from dotenv import load_dotenv
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, StateGraph
 
 load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
@@ -125,7 +125,7 @@ def preprocess_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("🔍 Preprocessing node - Classifying intent and extracting metadata")
 
     try:
-        agent = PreprocessAgent(model="gpt-4o-mini")
+        agent = PreprocessAgent(model="gpt-5-nano")
         result = agent.run({"query": state["query"]})
 
         # Update state with preprocessing results
@@ -160,7 +160,7 @@ def news_scraper_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📰 News Scraper node - Analyzing news article")
 
     try:
-        agent = NewsScraperAgent(model="gpt-4o-mini")
+        agent = NewsScraperAgent(model="gpt-5-nano")
 
         # For finance-company, use the URL from preprocessing
         if state.get("intent") == "finance-company" and state.get("url"):
@@ -201,7 +201,7 @@ def metric_extractor_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📊 Metric Extractor node - Analyzing financial metrics")
 
     try:
-        agent = MetricExtractorAgent(model="gpt-4o-mini")
+        agent = MetricExtractorAgent(model="gpt-5-nano")
 
         # Prepare news scraper output for context
         news_context = None
@@ -244,15 +244,15 @@ def metric_extractor_node(state: EquityResearchState) -> EquityResearchState:
 
 def sentiment_extractor_node(state: EquityResearchState) -> EquityResearchState:
     """
-    Sentiment Extractor node: Analyzes sentiment using FinBERT
+    Sentiment Extractor node: Analyzes sentiment using OpenAI
 
     Updates state with: sentiment_label, sentiment_confidence, sentiment_probs,
                         sentiment_stability, sentiment_evidence
     """
-    logger.info("💭 Sentiment Extractor node - Analyzing sentiment with FinBERT")
+    logger.info("💭 Sentiment Extractor node - Analyzing sentiment with OpenAI")
 
     try:
-        agent = SentimentAnalysisAgent(model_id="yiyanghkust/finbert-tone")
+        agent = SentimentAnalysisAgent(model_id="gpt-5-nano")
 
         # Combine available text for sentiment analysis
         text_sources = []
@@ -315,7 +315,7 @@ def research_compiler_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📝 Research Compiler node - Generating final report")
 
     try:
-        agent = ResearchCompilerAgent(model="gpt-4o-mini")
+        agent = ResearchCompilerAgent(model="gpt-5-nano")
 
         # Prepare state for compiler based on intent
         compiler_input = {

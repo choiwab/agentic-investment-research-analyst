@@ -71,9 +71,9 @@ class PreprocessModel(BaseModel):
     class Config:
         extra = "ignore"
 class SentimentModel:
-    """Model Schema for Sentiment Analysis with FinBERT and SEC Risk Assessment"""
-    positive_sentiment : str = ResponseSchema(name = "positive_sentiment", description = "Positive sentiment score and analysis from FinBERT")
-    negative_sentiment : str = ResponseSchema(name = "negative_sentiment", description = "Negative sentiment score and analysis from FinBERT")
+    """Model Schema for Sentiment Analysis with OpenAI and SEC Risk Assessment"""
+    positive_sentiment : str = ResponseSchema(name = "positive_sentiment", description = "Positive sentiment score and analysis from OpenAI")
+    negative_sentiment : str = ResponseSchema(name = "negative_sentiment", description = "Negative sentiment score and analysis from OpenAI")
     confidence_score : str = ResponseSchema(name = "confidence_score", description = "Overall confidence score of the sentiment analysis (0-1)")
     risk_parameter : str = ResponseSchema(name = "risk_parameter", description = "Comprehensive risk assessment score based on SEC risk factors")
     insight_summary : str = ResponseSchema(name = "insight_summary", description = "Combined insights from sentiment and risk analysis")
