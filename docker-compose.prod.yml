@@ -96,6 +96,7 @@ services:
 
   airflow-init:
     <<: *airflow-common
+    restart: "no"  # Override: init should not restart after completion
     entrypoint: /bin/bash
     command:
       - -c
