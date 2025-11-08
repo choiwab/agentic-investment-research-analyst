@@ -16,14 +16,26 @@ FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 if not FINNHUB_API_KEY:
     raise RuntimeError("FINNHUB_API_KEY is not set. Add it to your .env or environment.")
 
-ATLAS_URI = os.getenv("ATLAS_URI")
-if not ATLAS_URI:
-    raise RuntimeError("ATLAS_URI is not set. Add it to your .env or environment.")
 finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 
-# Use local MongoDB for Airflow DAG
-client = MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
-db = client["test"]
+# MongoDB connection - supports both local and Atlas
+MONGO_CONNECTION_STRING = os.getenv("MONGO_CONNECTION_STRING")
+ATLAS_URI = os.getenv("ATLAS_URI")
+
+if ATLAS_URI:
+    # Use MongoDB Atlas if ATLAS_URI is provided
+    client = MongoClient(ATLAS_URI, server_api=ServerApi('1'))
+    print("Using MongoDB Atlas")
+elif MONGO_CONNECTION_STRING:
+    # Use local MongoDB with connection string from .env
+    client = MongoClient(MONGO_CONNECTION_STRING)
+    print("Using local MongoDB from MONGO_CONNECTION_STRING")
+else:
+    # Fallback to default local MongoDB (for backward compatibility)
+    client = MongoClient("mongodb://root:password@mongo:27017/?authSource=admin")
+    print("Using default local MongoDB connection")
+
+db = client["financial_data"]
 
 # Alternative: Atlas connection (commented out for now)
 # def get_mongo_client():
