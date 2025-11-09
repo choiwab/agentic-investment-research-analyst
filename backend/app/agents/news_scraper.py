@@ -1,20 +1,20 @@
 # Agent Setup and Structuring Output
-from langchain_openai import ChatOpenAI
-from langchain.agents import AgentType, tool, initialize_agent, AgentExecutor
-from langchain.tools import BaseTool
-from langchain.output_parsers import StructuredOutputParser
-
 # News Scraping
 import requests
 from bs4 import BeautifulSoup
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, tool
+from langchain.output_parsers import StructuredOutputParser
+from langchain.tools import BaseTool
+from langchain_openai import ChatOpenAI
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
-from utils.model_schema import NewsModel
 from utils.conversation_buffer_safe import SafeConversationMemory
+from utils.model_schema import NewsModel
+
 
 class NewsScraperAgent:
-    def __init__(self, model: str = "gpt-5-nano") -> None:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
         self.callback_handler = PrintCallbackHandler()
         self.llm = ChatOpenAI(model=model, temperature=0, streaming=True, callbacks=[self.callback_handler])
         self.memory = SafeConversationMemory(
@@ -89,7 +89,7 @@ class NewsScraperAgent:
         return parsed_result
 
 if __name__ == "__main__":
-    agent = NewsScraperAgent(model="gpt-5-nano")
+    agent = NewsScraperAgent(model="gpt-4o-mini")
     state = {'url': "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"}   # Example
     results = agent.run(state)
     print('Qualitative Summary: ', results['qualitative_summary'])
