@@ -222,13 +222,13 @@ def web_search(query: str) -> Dict[str, Any]:
 
 
 @tool
-def fetch_ticker_summary(tickers: List[str]) -> Dict[str, Any]:
+def fetch_ticker_summary(tickers: Union[str, List[str]]) -> Dict[str, Any]:
     """
     Fetches comprehensive summary data for a list of tickers using the /ticker-summary endpoint.
     This is more efficient than fetch_ticker_data as it makes fewer API calls.
 
     Args:
-        tickers: List of ticker symbols (e.g., ["TSLA", "AAPL"])
+        tickers: Single ticker string (e.g., "TSLA") or List of ticker symbols (e.g., ["TSLA", "AAPL"])
 
     Returns:
         Dictionary with ticker symbols as keys, each containing summary data with latest information
@@ -237,7 +237,13 @@ def fetch_ticker_summary(tickers: List[str]) -> Dict[str, Any]:
     """
     result = {}
 
-    for ticker in tickers:
+    # Normalize input to always be a list
+    if isinstance(tickers, str):
+        ticker_list = [tickers]
+    else:
+        ticker_list = tickers
+
+    for ticker in ticker_list:
         try:
             response = requests.get(f"{FASTAPI_BASE_URL}/ticker-summary/{ticker}", timeout=10)
             if response.status_code == 200:
