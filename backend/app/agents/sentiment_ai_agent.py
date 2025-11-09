@@ -61,7 +61,7 @@ class AgentState(TypedDict):
 
 class SentimentAgent:
     
-    def __init__(self, model: str = "gpt-5-nano"):
+    def __init__(self, model: str = "gpt-4o-mini"):
         self.callback_handler = PrintCallbackHandler()
         self.llm = ChatOpenAI(
             model=model, 
@@ -884,7 +884,7 @@ Return a JSON array with the sentence numbers (1-indexed) that best support {dom
 
 
 if __name__ == "__main__":
-    agent = SentimentAgent(model="gpt-5-nano")
+    agent = SentimentAgent(model="gpt-4o-mini")
     
     # sample_text = """
     # Australia's top supermarket chains Woolworths and Coles said on Monday they could incur millions in additional remediation costs following the federal court's decision on historical underpayments to staff.
@@ -903,11 +903,11 @@ if __name__ == "__main__":
     
     # First, scrape
     
-    scraper = NewsScraperAgent(model="gpt-5-nano")
+    scraper = NewsScraperAgent(model="gpt-4o-mini")
     news_output = scraper.run({"url": "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"})
 
     # Then analyze
-    agent = SentimentAgent(model="gpt-5-nano")
+    agent = SentimentAgent(model="gpt-4o-mini")
     results = agent.run_from_news(news_output, ticker="")
     print(json.dumps(results, indent=2))
     
