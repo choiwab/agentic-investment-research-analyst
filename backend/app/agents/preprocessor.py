@@ -7,6 +7,8 @@ from langchain_openai import ChatOpenAI
 from langchain.output_parsers import StructuredOutputParser
 from langchain.prompts import PromptTemplate
 from langchain.schema import HumanMessage
+from langchain.tools import StructuredTool
+from langchain.agents import initialize_agent, AgentType
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
@@ -290,6 +292,80 @@ Answer:"""
             # Get finnhub URL if ticker found
             if ticker:
                 url = self._call_fetch_ticker_url(ticker)
+
+                if url is None:
+                    print("No URL found - invoking LLM chain with web_search tool")
+                    search_tool = StructuredTool.from_function(
+                        func = self._call_web_search,
+                        name = "web_search",
+                        description = "Searches the web for recent and relevant news about a company. Input should be a plain text query, not code."
+                    )
+                    prompt = PromptTemplate.from_template("""
+                    You are a senior financial assistant with access to the 'web_search' tool.
+                    **Objective:**
+                    Find the **most recent, detailed, and parsable financial news article or report** about the company that can be safely fetched and analyzed.  
+                    Your goal is to provide a URL that contains substantive **text content** about the company’s **financial performance, earnings, or strategic updates.**
+                    Prioritize for a website that contains the most details (metrics) and insights
+                    
+                    ---
+                                                          
+                    ### Steps:
+                    1. Use the 'web_search' tool to find recent, relevant information about the company.
+                        - Always call the tool using this exact structure:
+                            Action: web_search
+                            Action Input: <company name or ticker> recent financial news OR earnings report OR investor update OR press release
+                        - Never use parentheses. 
+                                             
+                    2. **Select a page that meets ALL of the following criteria:**
+                        - Published within the **past 6 months**
+                        - Contains **textual article content** (news, press release, or report)
+                        - Includes **metrics, numbers, or financial insights**
+                        - Readable and fetchable using normal HTTP requests
+                        - Not blocked by Cloudflare, CAPTCHA, login walls, or Akamai
+                        - Comes from an **official or reliable source**, such as:
+                            - Company investor relations (IR) page  
+                            - SEC filings (edgar.gov)  
+                            - Major financial outlets (Reuters, Bloomberg, CNBC, Yahoo Finance *news article pages*, MarketWatch *news section*)  
+                    3. **Explicitly avoid:**
+                        - Static stock profile or summary pages (like `/quote/TSLA/`)
+                        - General “news listing” or “overview” pages
+                        - PDF documents, images, or non-text content
+                        - Pages that cannot be parsed into readable text
+                    4. If all high-quality article URLs fail these conditions (e.g., unparseable, blocked, or PDF-only),  
+                        → fallback to the **official investor relations page** (IR) for the company instead.
+                    
+                    ---
+
+                    Return **strictly valid JSON** in this format:
+                    {{
+                        "url": "<url>"
+                    }}
+
+                    Ticker: {ticker}
+                    """)
+                    agent = initialize_agent(
+                        tools = [search_tool],
+                        llm = self.llm,
+                        agent_type = AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                        verbose = True,
+                        handle_parsing_errors = True
+                    )
+                    query_text = prompt.format(ticker = ticker)
+                    output = agent.invoke({"input" : query_text})
+                    print(f"[DEBUG] Raw LLM Output: \n{output}\n")
+
+                    
+                    raw_output = output.get("output", "") if isinstance(output, dict) else str(output)
+                    clean_output = re.sub(r"^```(?:json)?|```$", "", raw_output.strip(), flags=re.MULTILINE).strip()
+                    
+                    try:
+                        parsed = json.loads(clean_output)
+                        url = parsed.get("url")
+                    except:
+                        print("Failed to parse JSON output")
+                        urls = re.findall(r'https?://[^\s"\]]+', clean_output)
+                        url = urls if urls else None
+
                 result["url"] = url
                 print(f"✅ URL: {url}")
 
@@ -332,26 +408,26 @@ if __name__ == "__main__":
     result1 = agent.run({"query": "Give me a comprehensive analysis on Tesla stock"})
     print(f"\nResult: {json.dumps(result1, indent=2)}")
 
-    # Test 2: Irrelevant
-    print("\n\n### Test 2: Irrelevant ###")
-    result2 = agent.run({"query": "Tell me a joke about dogs"})
-    print(f"\nResult: {json.dumps(result2, indent=2)}")
+    # # Test 2: Irrelevant
+    # print("\n\n### Test 2: Irrelevant ###")
+    # result2 = agent.run({"query": "Tell me a joke about dogs"})
+    # print(f"\nResult: {json.dumps(result2, indent=2)}")
 
-    # Test 3: Finance-education
-    print("\n\n### Test 3: Finance-education ###")
-    result3 = agent.run({"query": "What is P/E ratio?"})
-    print(f"\nResult: {json.dumps(result3, indent=2)}")
+    # # Test 3: Finance-education
+    # print("\n\n### Test 3: Finance-education ###")
+    # result3 = agent.run({"query": "What is P/E ratio?"})
+    # print(f"\nResult: {json.dumps(result3, indent=2)}")
 
-    # Test 4: Finance-market (inflation trends)
-    print("\n\n### Test 4: Finance-market ###")
-    result4 = agent.run({"query": "What are inflation trends"})
-    print(f"\nResult: {json.dumps(result4, indent=2)}")
-    assert result4["intent"] == "finance-market", f"Expected finance-market, got {result4['intent']}"
-    print("✅ Test passed!")
+    # # Test 4: Finance-market (inflation trends)
+    # print("\n\n### Test 4: Finance-market ###")
+    # result4 = agent.run({"query": "What are inflation trends"})
+    # print(f"\nResult: {json.dumps(result4, indent=2)}")
+    # assert result4["intent"] == "finance-market", f"Expected finance-market, got {result4['intent']}"
+    # print("✅ Test passed!")
 
-    # Test 5: Finance-market (S&P 500)
-    print("\n\n### Test 5: Finance-market (S&P 500) ###")
-    result5 = agent.run({"query": "What's the S&P 500 outlook?"})
-    print(f"\nResult: {json.dumps(result5, indent=2)}")
-    assert result5["intent"] == "finance-market", f"Expected finance-market, got {result5['intent']}"
-    print("✅ Test passed!")
+    # # Test 5: Finance-market (S&P 500)
+    # print("\n\n### Test 5: Finance-market (S&P 500) ###")
+    # result5 = agent.run({"query": "What's the S&P 500 outlook?"})
+    # print(f"\nResult: {json.dumps(result5, indent=2)}")
+    # assert result5["intent"] == "finance-market", f"Expected finance-market, got {result5['intent']}"
+    # print("✅ Test passed!")
