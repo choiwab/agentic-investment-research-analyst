@@ -1,11 +1,13 @@
 # sentiment_agent.py
-import math
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
-import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
+
+load_dotenv(override=True)
 
 # for sentence splitting and text cleaning
 _SENT_SPLIT_RE = re.compile(r"(?<=[\.\?!])\s+(?=[A-Z(\[])")
@@ -14,21 +16,18 @@ _NON_WORD_RE = re.compile(r"^\W+$")
 
 class SentimentAnalysisAgent:
     """
-    Stand-alone FinBERT-based sentiment agent.
+    Stand-alone OpenAI-based sentiment agent for financial text.
     Input: raw_text (str), optional meta dict, optional entities list for light weighting.
     Output: dict with label, confidence, probs, stability, and evidence sentences.
     """
-    def __init__(self, model_id: str = "yiyanghkust/finbert-tone", max_length: int = 256):
+    def __init__(self, model_id: str = "gpt-4o-mini", max_length: int = 256):
         self.model_id = model_id
         self.max_length = max_length
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.tok = AutoTokenizer.from_pretrained(self.model_id)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_id).to(self.device).eval()
+        self.llm = ChatOpenAI(model=model_id, temperature=0)
 
     @staticmethod
     def _clean_text(text: str) -> str:
         return _WS_RE.sub(" ", text or "").strip()
-
 
     @staticmethod
     def _split_sentences(text: str) -> List[str]:
@@ -48,78 +47,141 @@ class SentimentAnalysisAgent:
                 uniq.append(s)
         return uniq
 
-    @torch.inference_mode()
-    def _score_batch(self, sentences: list[str], batch_size: int = 32) -> np.ndarray:
-        probs = []
-        for i in range(0, len(sentences), batch_size):
-            batch = sentences[i:i+batch_size]
-            enc = self.tok(
-                batch,
-                padding=True,
-                truncation=True,
-                max_length=self.max_length,
-                return_tensors="pt",
-            ).to(self.device)
-            logits = self.model(**enc).logits
-            p = torch.softmax(logits, dim=-1).detach().cpu().numpy()  # [N,3] -> [neg, neu, pos]
-            probs.append(p)
-        return np.vstack(probs) if probs else np.zeros((0, 3), dtype=np.float32)
-
     @staticmethod
     def _entropy_row(p: np.ndarray) -> float:
         p = np.clip(p, 1e-9, 1.0)
         return float(-(p * np.log(p)).sum())
 
+    def _analyze_sentiment_with_openai(self, text: str, entities: List[str] = None) -> Dict[str, Any]:
+        """Analyze sentiment using OpenAI with structured output"""
+        class SentimentResult(BaseModel):
+            sentiment_label: str = Field(description="Overall sentiment: 'positive', 'negative', or 'neutral'")
+            confidence_score: float = Field(description="Confidence score between 0.0 and 1.0")
+            positive_prob: float = Field(description="Probability of positive sentiment (0.0 to 1.0)")
+            negative_prob: float = Field(description="Probability of negative sentiment (0.0 to 1.0)")
+            neutral_prob: float = Field(description="Probability of neutral sentiment (0.0 to 1.0)")
+            reasoning: str = Field(description="Brief explanation of the sentiment analysis")
+        
+        entities_context = ""
+        if entities:
+            entities_context = f"\n\nPay special attention to mentions of: {', '.join(entities)}"
+        
+        prompt = f"""Analyze the sentiment of the following financial text. Consider financial terminology, market context, and investment implications.{entities_context}
+
+Text:
+{text}
+
+Provide a detailed sentiment analysis with probabilities that sum to 1.0. Focus on financial sentiment indicators like:
+- Positive: growth, profit, gains, beat expectations, strong performance, bullish
+- Negative: losses, decline, miss expectations, weak performance, concerns, bearish
+- Neutral: stable, unchanged, mixed signals, balanced
+
+Return structured sentiment analysis with probabilities."""
+
+        try:
+            structured_llm = self.llm.with_structured_output(SentimentResult)
+            result = structured_llm.invoke(prompt)
+            
+            return {
+                "sentiment_label": result.sentiment_label.lower(),
+                "confidence_score": result.confidence_score,
+                "positive_prob": result.positive_prob,
+                "negative_prob": result.negative_prob,
+                "neutral_prob": result.neutral_prob,
+                "reasoning": result.reasoning
+            }
+        except Exception as e:
+            print(f"Error in OpenAI sentiment analysis: {e}")
+            # Fallback to keyword-based analysis
+            return self._fallback_sentiment_analysis(text)
+
+    def _fallback_sentiment_analysis(self, text: str) -> Dict[str, Any]:
+        """Simple keyword-based fallback sentiment analysis"""
+        positive_keywords = ['growth', 'profit', 'gain', 'strong', 'beat', 'exceed', 'increase', 'improve', 'positive', 'bullish']
+        negative_keywords = ['loss', 'decline', 'weak', 'miss', 'concern', 'risk', 'decrease', 'negative', 'bearish', 'fall']
+        
+        text_lower = text.lower()
+        pos_count = sum(1 for word in positive_keywords if word in text_lower)
+        neg_count = sum(1 for word in negative_keywords if word in text_lower)
+        
+        total = pos_count + neg_count
+        if total == 0:
+            return {
+                "sentiment_label": "neutral",
+                "confidence_score": 0.5,
+                "positive_prob": 0.33,
+                "negative_prob": 0.33,
+                "neutral_prob": 0.34
+            }
+        
+        pos_prob = pos_count / total if total > 0 else 0.33
+        neg_prob = neg_count / total if total > 0 else 0.33
+        neu_prob = 1.0 - pos_prob - neg_prob
+        
+        if pos_prob > neg_prob:
+            label = "positive"
+            confidence = pos_prob
+        elif neg_prob > pos_prob:
+            label = "negative"
+            confidence = neg_prob
+        else:
+            label = "neutral"
+            confidence = neu_prob
+        
+        return {
+            "sentiment_label": label,
+            "confidence_score": confidence,
+            "positive_prob": pos_prob,
+            "negative_prob": neg_prob,
+            "neutral_prob": neu_prob
+        }
+
     def run(self, raw_text: str, meta: dict | None = None, entities: list[str] | None = None) -> dict:
         if not raw_text or len(raw_text) < 40:
             return {"error": "empty_or_short_text", "meta": meta or {}}
 
+        # Analyze sentiment with OpenAI
+        sentiment_result = self._analyze_sentiment_with_openai(raw_text, entities or [])
+        
+        if "error" in sentiment_result:
+            return {"error": "sentiment_analysis_failed", "meta": meta or {}}
+
+        # Extract probabilities
+        p_neg_mean = sentiment_result.get("negative_prob", 0.33)
+        p_neu_mean = sentiment_result.get("neutral_prob", 0.33)
+        p_pos_mean = sentiment_result.get("positive_prob", 0.34)
+        
+        # Calculate entropy for stability
+        probs_array = np.array([p_neg_mean, p_neu_mean, p_pos_mean])
+        entropy_mean = self._entropy_row(probs_array)
+        p_neg_var = 0.0  # Variance not calculated for single analysis
+
+        # Get evidence sentences
         sentences = self._split_sentences(raw_text)
-        if not sentences:
-            return {"error": "no_sentences_parsed", "meta": meta or {}}
-
-        # light weighting: boost headline + sentences that mention entities/tickers
-        weights = np.ones(len(sentences), dtype=np.float32)
-        weights[0] *= 1.5  # headline boost
-        if entities:
-            pat = re.compile(r"|".join([re.escape(e) for e in entities]), re.I)
-            for i, s in enumerate(sentences):
-                if pat.search(s):
-                    weights[i] *= 1.2
-        weights = weights / weights.sum()
-
-        probs = self._score_batch(sentences)  # [N,3] -> [neg, neu, pos]
-        p_neg, p_neu, p_pos = probs[:, 0], probs[:, 1], probs[:, 2]
-
-        # weighted document-level means
-        p_neg_mean = float(np.dot(p_neg, weights))
-        p_neu_mean = float(np.dot(p_neu, weights))
-        p_pos_mean = float(np.dot(p_pos, weights))
-
-        # stability / uncertainty
-        p_neg_var = float(np.dot((p_neg - p_neg_mean) ** 2, weights))
-        entropies = np.array([self._entropy_row(p) for p in probs], dtype=np.float32)
-        entropy_mean = float(np.dot(entropies, weights))
-
-        # label + confidence from aggregated probs
-        means = np.array([p_neg_mean, p_neu_mean, p_pos_mean])
-        idx = int(np.argmax(means))
-        label = ["negative", "neutral", "positive"][idx]
-        confidence = float(means[idx])
-
-        # evidence sentences (top-k extremes)
         k = min(5, len(sentences))
-        top_negative_idx = np.argsort(-p_neg)[:k]
-        top_positive_idx = np.argsort(-p_pos)[:k]
-        top_negative = [{"sentence": sentences[i], "p_neg": float(p_neg[i])} for i in top_negative_idx]
-        top_positive = [{"sentence": sentences[i], "p_pos": float(p_pos[i])} for i in top_positive_idx]
+        
+        # Use keyword matching for evidence (simplified)
+        top_negative = []
+        top_positive = []
+        negative_keywords = ['loss', 'decline', 'weak', 'miss', 'concern', 'risk', 'decrease', 'negative', 'bearish']
+        positive_keywords = ['growth', 'profit', 'gain', 'strong', 'beat', 'exceed', 'increase', 'improve', 'positive', 'bullish']
+        
+        for i, s in enumerate(sentences[:k]):
+            s_lower = s.lower()
+            neg_score = sum(1 for word in negative_keywords if word in s_lower)
+            pos_score = sum(1 for word in positive_keywords if word in s_lower)
+            
+            if neg_score > 0:
+                top_negative.append({"sentence": s, "p_neg": float(neg_score / max(len(s.split()), 1))})
+            if pos_score > 0:
+                top_positive.append({"sentence": s, "p_pos": float(pos_score / max(len(s.split()), 1))})
 
         return {
             "sentiment": {
-                "label": label,
-                "confidence": confidence,
+                "label": sentiment_result.get("sentiment_label", "neutral"),
+                "confidence": sentiment_result.get("confidence_score", 0.5),
                 "model": self.model_id,
-                "aggregation": "sentence_mean_weighted"
+                "aggregation": "openai_structured"
             },
             "probs": {
                 "p_neg_mean": p_neg_mean,
@@ -131,8 +193,8 @@ class SentimentAnalysisAgent:
                 "entropy_mean": entropy_mean
             },
             "evidence": {
-                "top_negative": top_negative,
-                "top_positive": top_positive
+                "top_negative": top_negative[:k],
+                "top_positive": top_positive[:k]
             },
             "meta": meta or {}
         }

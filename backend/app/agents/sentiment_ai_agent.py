@@ -2,21 +2,19 @@ import json
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Optional, Sequence, TypedDict, Tuple
+from typing import Annotated, Any, Dict, List, Optional, Sequence, TypedDict
 
 import numpy as np
+from dotenv import load_dotenv
 from langchain.output_parsers import StructuredOutputParser
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
+from news_scraper import NewsScraperAgent
 from utils.callback_handler import PrintCallbackHandler
-from utils.finbert_analyzer import FinBERTAnalyzer
 from utils.model_schema import SentimentModel
 from utils.sec_risk_analyzer import SECRiskAnalyzer
-
-from news_scraper import NewsScraperAgent
-from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(override=True)
 
@@ -63,9 +61,9 @@ class AgentState(TypedDict):
 
 class SentimentAgent:
     
-    def __init__(self, model: str = "llama3.1", finbert_model: str = "ProsusAI/finbert"):
+    def __init__(self, model: str = "gpt-4o-mini"):
         self.callback_handler = PrintCallbackHandler()
-        self.llm = ChatOllama(
+        self.llm = ChatOpenAI(
             model=model, 
             temperature=0, 
             streaming=True, 
@@ -73,11 +71,11 @@ class SentimentAgent:
         )
         try:
             _ = self.llm.invoke("ping")
-            print("[SentimentAgent] Ollama LLM reachable.")
+            print("[SentimentAgent] OpenAI LLM reachable.")
         except Exception as e:
-            print(f"[SentimentAgent] Ollama not reachable or model not loaded: {e}")
+            print(f"[SentimentAgent] OpenAI not reachable: {e}")
         
-        self.finbert_analyzer = FinBERTAnalyzer(model_name=finbert_model)
+        # FinBERT removed - using OpenAI for sentiment analysis
         self.risk_analyzer = SECRiskAnalyzer()
         
         self.parser = StructuredOutputParser.from_response_schemas(SentimentModel.response_schema)
@@ -165,7 +163,7 @@ class SentimentAgent:
     def _sentiment_analysis_node(self, state: AgentState) -> Dict[str, Any]:
         try:
             text = state["text"]
-            result = self.finbert_analyzer.analyze_sentiment(text)
+            result = self._analyze_sentiment_with_openai(text)
             if not result:
                 raise ValueError("Sentiment analysis returned no results")
 
@@ -186,7 +184,7 @@ class SentimentAgent:
             if "evidence" in result and result["evidence"]:
                 sentiment_data["evidence"] = result["evidence"]
             else:
-                ev = self._collect_sentiment_evidence(
+                ev = self._collect_sentiment_evidence_openai(
                     text, sentiment_data["dominant_sentiment"], top_k=5
                 )
                 if ev:
@@ -702,46 +700,142 @@ class SentimentAgent:
         parts = re.split(r'(?<=[\.\!\?])\s+', text.strip())
         return [p for p in parts if p]
 
-    def _collect_sentiment_evidence(self, text: str, dominant_label: str, top_k: int = 5) -> List[Dict[str, Any]]:
-  
-        # Returns top_k sentences that most strongly support the dominant sentiment.
+    def _analyze_sentiment_with_openai(self, text: str) -> Dict[str, Any]:
+        """Analyze sentiment using OpenAI with structured output for financial text"""
+        from pydantic import BaseModel, Field
         
+        class SentimentAnalysis(BaseModel):
+            sentiment_label: str = Field(description="Overall sentiment: 'positive', 'negative', or 'neutral'")
+            confidence_score: float = Field(description="Confidence score between 0.0 and 1.0")
+            positive_prob: float = Field(description="Probability of positive sentiment (0.0 to 1.0)")
+            negative_prob: float = Field(description="Probability of negative sentiment (0.0 to 1.0)")
+            neutral_prob: float = Field(description="Probability of neutral sentiment (0.0 to 1.0)")
+            reasoning: str = Field(description="Brief explanation of the sentiment analysis")
+        
+        prompt = f"""Analyze the sentiment of the following financial text. Consider financial terminology, market context, and investment implications.
+
+Text:
+{text}
+
+Provide a detailed sentiment analysis with probabilities that sum to 1.0. Focus on financial sentiment indicators like:
+- Positive: growth, profit, gains, beat expectations, strong performance
+- Negative: losses, decline, miss expectations, weak performance, concerns
+- Neutral: stable, unchanged, mixed signals, balanced
+
+Return structured sentiment analysis with probabilities."""
+
+        try:
+            structured_llm = self.llm.with_structured_output(SentimentAnalysis)
+            result = structured_llm.invoke(prompt)
+            
+            sentiment_score = result.positive_prob - result.negative_prob
+            
+            return {
+                "sentiment_label": result.sentiment_label.lower(),
+                "confidence_score": result.confidence_score,
+                "sentiment_score": sentiment_score,
+                "positive_prob": result.positive_prob,
+                "negative_prob": result.negative_prob,
+                "neutral_prob": result.neutral_prob,
+                "reasoning": result.reasoning,
+                "uncertainty_entropy": self._calculate_entropy([
+                    result.positive_prob, result.neutral_prob, result.negative_prob
+                ])
+            }
+        except Exception as e:
+            print(f"Error in OpenAI sentiment analysis: {e}")
+            # Fallback to simple keyword-based analysis
+            return self._fallback_sentiment_analysis(text)
+    
+    def _calculate_entropy(self, probs: List[float]) -> float:
+        """Calculate entropy for uncertainty measurement"""
+        import numpy as np
+        probs = np.clip(probs, 1e-9, 1.0)
+        return float(-np.sum(probs * np.log(probs)))
+    
+    def _fallback_sentiment_analysis(self, text: str) -> Dict[str, Any]:
+        """Simple keyword-based fallback sentiment analysis"""
+        positive_keywords = ['growth', 'profit', 'gain', 'strong', 'beat', 'exceed', 'increase', 'improve', 'positive', 'bullish']
+        negative_keywords = ['loss', 'decline', 'weak', 'miss', 'concern', 'risk', 'decrease', 'negative', 'bearish', 'fall']
+        
+        text_lower = text.lower()
+        pos_count = sum(1 for word in positive_keywords if word in text_lower)
+        neg_count = sum(1 for word in negative_keywords if word in text_lower)
+        
+        total = pos_count + neg_count
+        if total == 0:
+            return {
+                "sentiment_label": "neutral",
+                "confidence_score": 0.5,
+                "sentiment_score": 0.0,
+                "positive_prob": 0.33,
+                "negative_prob": 0.33,
+                "neutral_prob": 0.34,
+                "uncertainty_entropy": 1.0
+            }
+        
+        pos_prob = pos_count / total if total > 0 else 0.33
+        neg_prob = neg_count / total if total > 0 else 0.33
+        neu_prob = 1.0 - pos_prob - neg_prob
+        
+        if pos_prob > neg_prob:
+            label = "positive"
+            confidence = pos_prob
+        elif neg_prob > pos_prob:
+            label = "negative"
+            confidence = neg_prob
+        else:
+            label = "neutral"
+            confidence = neu_prob
+        
+        return {
+            "sentiment_label": label,
+            "confidence_score": confidence,
+            "sentiment_score": pos_prob - neg_prob,
+            "positive_prob": pos_prob,
+            "negative_prob": neg_prob,
+            "neutral_prob": neu_prob,
+            "uncertainty_entropy": self._calculate_entropy([pos_prob, neu_prob, neg_prob])
+        }
+    
+    def _collect_sentiment_evidence_openai(self, text: str, dominant_label: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """Collect evidence sentences using OpenAI"""
         sentences = self._split_sentences(text)
-        scored: List[Tuple[float, Dict[str, Any]]] = []
+        if not sentences:
+            return []
+        
+        # Use OpenAI to score sentences for the dominant sentiment
+        evidence_prompt = f"""Given the following sentences from financial text, identify the top {top_k} sentences that most strongly support {dominant_label} sentiment.
 
-        for s in sentences:
-            try:
-                r = self.finbert_analyzer.analyze_sentiment(s)
-                # choose a score that ranks by how strongly it matches dominant_label
-                label = r.get("sentiment_label", "neutral")
-                pos = float(r.get("positive_prob", 0.0))
-                neu = float(r.get("neutral_prob", 0.0))
-                neg = float(r.get("negative_prob", 0.0))
-                conf = float(r.get("confidence_score", 0.0))
+Sentences:
+{chr(10).join(f"{i+1}. {s}" for i, s in enumerate(sentences))}
 
-                if dominant_label == "positive":
-                    rank_score = pos - max(neu, neg)
-                elif dominant_label == "negative":
-                    rank_score = neg - max(neu, pos)
-                else:  # neutral: prefer high neutral & low max(pos,neg)
-                    rank_score = neu - max(pos, neg)
+Return a JSON array with the sentence numbers (1-indexed) that best support {dominant_label} sentiment, ordered by strength."""
 
-                scored.append((
-                    float(rank_score),
-                    {
-                        "sentence": s,
-                        "label": label,
-                        "confidence": conf,
-                        "positive_prob": pos,
-                        "neutral_prob": neu,
-                        "negative_prob": neg,
-                    }
-                ))
-            except Exception:
-                continue
-
-        scored.sort(key=lambda x: x[0], reverse=True)
-        return [item for _, item in scored[:top_k]]
+        try:
+            from pydantic import BaseModel, Field
+            
+            class EvidenceResponse(BaseModel):
+                sentence_numbers: List[int] = Field(description=f"Top {top_k} sentence numbers (1-indexed) supporting {dominant_label} sentiment")
+            
+            structured_llm = self.llm.with_structured_output(EvidenceResponse)
+            result = structured_llm.invoke(evidence_prompt)
+            
+            evidence = []
+            for num in result.sentence_numbers[:top_k]:
+                if 1 <= num <= len(sentences):
+                    evidence.append({
+                        "sentence": sentences[num - 1],
+                        "label": dominant_label,
+                        "confidence": 0.8  # Default confidence
+                    })
+            
+            return evidence
+        except Exception as e:
+            print(f"Error collecting evidence with OpenAI: {e}")
+            # Fallback: return first few sentences
+            return [{"sentence": s, "label": dominant_label, "confidence": 0.5} 
+                   for s in sentences[:top_k]]
 
     def run(self, text: str, ticker: Optional[str] = None, entities: Optional[List[str]] = None, 
             thread_id: Optional[str] = None) -> Dict[str, Any]:
@@ -790,7 +884,7 @@ class SentimentAgent:
 
 
 if __name__ == "__main__":
-    agent = SentimentAgent(model="llama3.1")
+    agent = SentimentAgent(model="gpt-4o-mini")
     
     # sample_text = """
     # Australia's top supermarket chains Woolworths and Coles said on Monday they could incur millions in additional remediation costs following the federal court's decision on historical underpayments to staff.
@@ -809,11 +903,11 @@ if __name__ == "__main__":
     
     # First, scrape
     
-    scraper = NewsScraperAgent(model="llama3.1")
+    scraper = NewsScraperAgent(model="gpt-4o-mini")
     news_output = scraper.run({"url": "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"})
 
     # Then analyze
-    agent = SentimentAgent(model="llama3.1")
+    agent = SentimentAgent(model="gpt-4o-mini")
     results = agent.run_from_news(news_output, ticker="")
     print(json.dumps(results, indent=2))
     

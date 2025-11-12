@@ -1,17 +1,17 @@
 # Agent Setup and Structuring Output
-from langchain_openai import ChatOpenAI
-from langchain.agents import AgentType, tool, initialize_agent, AgentExecutor
-from langchain.tools import BaseTool
-from langchain.output_parsers import StructuredOutputParser
-
 # News Scraping
 import requests
 from bs4 import BeautifulSoup
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, tool
+from langchain.output_parsers import StructuredOutputParser
+from langchain.tools import BaseTool
+from langchain_openai import ChatOpenAI
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
-from utils.model_schema import NewsModel
 from utils.conversation_buffer_safe import SafeConversationMemory
+from utils.model_schema import NewsModel
+
 
 class NewsScraperAgent:
     def __init__(self, model: str = "gpt-4o-mini") -> None:

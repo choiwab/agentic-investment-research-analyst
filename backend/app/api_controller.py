@@ -1,8 +1,8 @@
 import os
 import sys
+import time
 from pathlib import Path
 from typing import List, Optional
-import time
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
@@ -32,9 +32,10 @@ app.add_middleware(
         "http://localhost:5173",  # Vite dev server
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
-        # Add your production URLs here when deployed
+        # Production URLs
         "https://agentic-investment-research-analyst.vercel.app",
         "https://*.netlify.app",
+        "https://*.onrender.com",  # Render frontend deployments
     ],
     allow_credentials=True,
     allow_methods=["*"],

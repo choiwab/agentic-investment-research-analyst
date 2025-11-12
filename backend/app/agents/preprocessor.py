@@ -1,20 +1,20 @@
-import os
 import json
+import os
 import re
 
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
 from langchain.output_parsers import StructuredOutputParser
 from langchain.prompts import PromptTemplate
 from langchain.schema import HumanMessage
 from langchain.tools import StructuredTool
 from langchain.agents import initialize_agent, AgentType
+from langchain_openai import ChatOpenAI
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
-from utils.tools import fetch_peers, web_search
 from utils.fetch_ticker_url import fetch_ticker_url
 from utils.model_schema import PreprocessModel
+from utils.tools import fetch_peers, web_search
 
 load_dotenv(override=True)
 
@@ -34,8 +34,9 @@ class PreprocessAgent:
 
     def _classify_intent(self, query: str) -> str:
         """Classify the intent of the query using OpenAI with structured output."""
-        from pydantic import BaseModel, Field
         from typing import Literal
+
+        from pydantic import BaseModel, Field
 
         class IntentClassification(BaseModel):
             """Intent classification result"""
@@ -115,8 +116,9 @@ Classify this query and provide your reasoning."""
 
     def _extract_ticker(self, query: str) -> str:
         """Extract ticker symbol from query using OpenAI with structured output."""
-        from pydantic import BaseModel, Field
         from typing import Optional
+
+        from pydantic import BaseModel, Field
 
         class TickerExtraction(BaseModel):
             """Ticker extraction result"""
