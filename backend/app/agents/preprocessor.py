@@ -353,10 +353,14 @@ Answer:"""
                         handle_parsing_errors = True
                     )
                     query_text = prompt.format(ticker = ticker)
-                    output = agent.invoke({"input" : query_text})
-                    print(f"[DEBUG] Raw LLM Output: \n{output}\n")
+                    try:
+                        output = agent.invoke({"input" : query_text})
+                        print(f"[DEBUG] Raw LLM Output: \n{output}\n")
+                    except Exception as e:
+                        print(f"Agent web search failed : {e}")
+                        result['url'] = None
+                        return result
 
-                    
                     raw_output = output.get("output", "") if isinstance(output, dict) else str(output)
                     clean_output = re.sub(r"^```(?:json)?|```$", "", raw_output.strip(), flags=re.MULTILINE).strip()
                     
