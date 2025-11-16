@@ -56,9 +56,18 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "health": "/health",
+            "ping": "/ping",
             "research": "/api/research (POST)",
             "outputs": "/outputs/{filename}",
         }
+    }
+
+@app.get("/ping")
+async def ping():
+    """Lightweight ping endpoint for cronjobs to keep service alive"""
+    return {
+        "status": "ok",
+        "message": "pong"
     }
 
 @app.get("/health")
