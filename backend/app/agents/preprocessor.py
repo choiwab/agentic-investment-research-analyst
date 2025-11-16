@@ -22,7 +22,7 @@ class PreprocessAgent:
     Uses direct prompting for intent classification and entity extraction.
     """
 
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, model: str = "gpt-4o") -> None:
         self.model = model
         self.llm = ChatOpenAI(
             model=model,
@@ -112,11 +112,144 @@ Classify this query and provide your reasoning."""
             print(f"[DEBUG] Falling back to irrelevant")
             return "irrelevant"
 
+    def _extract_ticker_with_yahoo_finance(self, query: str, company_name: str = None) -> str:
+        """Extract ticker symbol using Yahoo Finance search via web search and yfinance validation."""
+        from typing import Optional
+
+        import yfinance as yf
+        from pydantic import BaseModel, Field
+
+        class TickerExtraction(BaseModel):
+            """Ticker extraction result"""
+            ticker: Optional[str] = Field(
+                description="The stock ticker symbol in uppercase (e.g., TSLA, AAPL), or null if no ticker found"
+            )
+            confidence: str = Field(
+                description="Confidence level: 'high', 'medium', or 'low'"
+            )
+
+        # Build search query specifically for Yahoo Finance
+        search_term = company_name if company_name else query
+        search_query = f"site:finance.yahoo.com {search_term} stock ticker"
+        
+        print(f"[DEBUG] Searching Yahoo Finance for ticker: {search_query}")
+        
+        try:
+            # Call web search to find Yahoo Finance pages
+            search_result = web_search.invoke({"query": search_query})
+            
+            if not search_result or not isinstance(search_result, dict):
+                print(f"[DEBUG] Yahoo Finance search failed or returned invalid result")
+                return None
+            
+            if "error" in search_result:
+                print(f"[DEBUG] Yahoo Finance search returned error: {search_result.get('error')}")
+                return None
+            
+            # Extract text from search results, prioritizing Yahoo Finance URLs
+            search_text = ""
+            yahoo_urls = []
+            
+            if "results" in search_result:
+                for result in search_result.get("results", []):
+                    if isinstance(result, dict):
+                        url = result.get("url", "")
+                        text = result.get("text", "")
+                        
+                        # Prioritize Yahoo Finance URLs
+                        if "finance.yahoo.com" in url or "yahoo.com/quote" in url:
+                            yahoo_urls.append(url)
+                            search_text = text + "\n\n" + search_text  # Prepend Yahoo Finance results
+                        else:
+                            search_text += text + "\n\n"
+            
+            if not search_text:
+                print(f"[DEBUG] No text content found in Yahoo Finance search results")
+                return None
+            
+            # Use LLM to extract ticker from search results
+            structured_llm = self.llm.with_structured_output(TickerExtraction)
+            print(search_text)
+            # Limit search text to first 3000 chars
+            limited_text = search_text[:3000]
+            
+            prompt = f"""Extract the stock ticker symbol from the following Yahoo Finance search results.
+
+Search Query: "{search_term}"
+
+Yahoo Finance Search Results:
+{limited_text}
+
+Extract the ticker symbol (e.g., TSLA, AAPL, MSFT). Look for patterns like:
+- Yahoo Finance URLs: finance.yahoo.com/quote/XXX
+- "Symbol: XXX" or "Ticker: XXX"
+- "NYSE: XXX" or "NASDAQ: XXX"
+- Stock symbol in parentheses: Company Name (XXX)
+- Ticker codes in the text
+
+Return the ticker in uppercase. If no clear ticker is found, return null."""
+
+            result = structured_llm.invoke(prompt)
+            ticker = result.ticker
+
+            print(f"[DEBUG] Yahoo Finance ticker extraction: {ticker} (confidence: {result.confidence})")
+            
+            # Validate ticker format and existence using yfinance
+            if ticker:
+                ticker = ticker.upper().strip()
+                # Valid tickers are 1-6 characters (some have dots like BRK.B)
+                if len(ticker.replace(".", "")) > 0 and len(ticker) <= 6:
+                    # Validate ticker exists using yfinance
+                    try:
+                        yf_ticker = yf.Ticker(ticker)
+                        info = yf_ticker.info
+                        # Check if we got valid info (has symbol or company name)
+                        if info and (info.get("symbol") or info.get("longName") or info.get("shortName")):
+                            print(f"[DEBUG] Ticker {ticker} validated with yfinance")
+                            return ticker
+                        else:
+                            print(f"[DEBUG] Ticker {ticker} not found in yfinance, but returning anyway")
+                            # Return the ticker even if yfinance doesn't have full info
+                            # (might be a valid ticker that yfinance doesn't fully support)
+                            return ticker
+                    except Exception as yf_error:
+                        print(f"[DEBUG] yfinance validation failed for {ticker}: {yf_error}")
+                        # Still return the ticker if yfinance validation fails (might be valid but yfinance issue)
+                        return ticker
+
+            return None
+
+        except Exception as e:
+            print(f"[ERROR] Yahoo Finance ticker extraction failed: {e}")
+            return None
+
     def _extract_ticker(self, query: str) -> str:
-        """Extract ticker symbol from query using OpenAI with structured output."""
+        """Extract ticker symbol from query using OpenAI with structured output, with Yahoo Finance fallback."""
         from typing import Optional
 
         from pydantic import BaseModel, Field
+
+        # First, check if query already contains a ticker-like pattern (1-6 uppercase letters, possibly with dot)
+        # Pattern matches: 1-5 letters, optionally followed by . and 1 letter (e.g., BRK.B)
+        ticker_pattern = r'\b([A-Z]{1,5}(?:\.[A-Z])?)\b'
+        potential_tickers = re.findall(ticker_pattern, query.upper())
+        
+        # Filter potential tickers (common words to exclude, and must be at least 2 characters)
+        common_words = {'I', 'A', 'AN', 'THE', 'IS', 'IT', 'IN', 'ON', 'AT', 'TO', 'FOR', 'OF', 'AND', 'OR', 'BUT', 'AS', 'AM', 'BE', 'DO', 'GO', 'IF', 'MY', 'NO', 'SO', 'UP', 'WE'}
+        potential_tickers = [t for t in potential_tickers if t not in common_words and len(t.replace('.', '')) >= 2]
+        
+        if potential_tickers:
+            # Try to validate the first potential ticker using yfinance
+            for potential_ticker in potential_tickers[:3]:  # Check up to 3 potential tickers
+                try:
+                    import yfinance as yf
+                    yf_ticker = yf.Ticker(potential_ticker)
+                    info = yf_ticker.info
+                    if info and (info.get("symbol") or info.get("longName") or info.get("shortName")):
+                        print(f"[DEBUG] Found ticker in query: {potential_ticker} (validated with yfinance)")
+                        return potential_ticker.upper()
+                except Exception:
+                    continue
 
         class TickerExtraction(BaseModel):
             """Ticker extraction result"""
@@ -132,6 +265,9 @@ Classify this query and provide your reasoning."""
 
         prompt = f"""Extract the stock ticker symbol from this query.
 
+IMPORTANT: The query may already contain a ticker symbol (1-5 uppercase letters like TSLA, AAPL, IOSP, etc.). 
+If you see a ticker-like pattern in the query, extract it directly.
+
 Common company to ticker mappings:
 - Tesla / Tesla Motors → TSLA
 - Apple / Apple Inc → AAPL
@@ -146,28 +282,41 @@ Common company to ticker mappings:
 
 Query: "{query}"
 
-If a company or stock is mentioned, return its ticker symbol in uppercase. If no company is mentioned, return null for ticker."""
+If a ticker symbol appears in the query (like "IOSP", "TSLA", etc.), extract it directly.
+If a company name is mentioned, return its ticker symbol in uppercase.
+If no company or ticker is mentioned, return null for ticker."""
 
         try:
             result = structured_llm.invoke(prompt)
             ticker = result.ticker
+            company_name = result.company_name
 
             print(f"[DEBUG] Ticker extraction: {ticker}")
-            if result.company_name:
-                print(f"[DEBUG] Company identified: {result.company_name}")
+            if company_name:
+                print(f"[DEBUG] Company identified: {company_name}")
 
             # Validate ticker format
             if ticker:
                 ticker = ticker.upper().strip()
-                # Valid tickers are 1-5 characters (some have dots like BRK.B)
+                # Valid tickers are 1-6 characters (some have dots like BRK.B)
                 if len(ticker.replace(".", "")) > 0 and len(ticker) <= 6:
                     return ticker
+            
+            # If OpenAI didn't find a ticker but identified a company, try Yahoo Finance search
+            if not ticker and company_name:
+                print(f"[DEBUG] OpenAI didn't find ticker, trying Yahoo Finance search for: {company_name}")
+                yahoo_ticker = self._extract_ticker_with_yahoo_finance(query, company_name)
+                if yahoo_ticker:
+                    return yahoo_ticker
 
             return None
 
         except Exception as e:
             print(f"[ERROR] Ticker extraction failed: {e}")
-            return None
+            # Try Yahoo Finance as fallback
+            print(f"[DEBUG] Trying Yahoo Finance search as fallback")
+            yahoo_ticker = self._extract_ticker_with_yahoo_finance(query)
+            return yahoo_ticker if yahoo_ticker else None
 
     def _extract_timeframe(self, query: str) -> str:
         """Extract or default timeframe."""
@@ -327,7 +476,7 @@ if __name__ == "__main__":
     print("Testing Preprocessing Agent with OpenAI")
     print("=" * 80)
 
-    agent = PreprocessAgent(model="gpt-4o-mini")
+    agent = PreprocessAgent(model="gpt-4o")
 
     # Test 1: Finance-company
     print("\n### Test 1: Finance-company ###")

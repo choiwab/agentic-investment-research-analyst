@@ -20,7 +20,7 @@ class SentimentAnalysisAgent:
     Input: raw_text (str), optional meta dict, optional entities list for light weighting.
     Output: dict with label, confidence, probs, stability, and evidence sentences.
     """
-    def __init__(self, model_id: str = "gpt-4o-mini", max_length: int = 256):
+    def __init__(self, model_id: str = "gpt-4o", max_length: int = 256):
         self.model_id = model_id
         self.max_length = max_length
         self.llm = ChatOpenAI(model=model_id, temperature=0)
