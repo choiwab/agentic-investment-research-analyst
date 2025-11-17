@@ -46,6 +46,77 @@ def fetch_ticker_data(tickers: Union[str, List[str]]) -> Dict[str, Any]:
     return result
 
 
+def _should_use_alpha_vantage_fallback(data: Dict[str, Any]) -> bool:
+    """
+    Determine if Alpha Vantage fallback should be used based on MongoDB data quality.
+
+    Args:
+        data: Data dictionary returned from MongoDB fetch attempts
+
+    Returns:
+        True if fallback is needed, False otherwise
+    """
+    # Critical fields that must be present for meaningful analysis
+    critical_fields = ["company", "basic_financials", "market_data"]
+
+    for field in critical_fields:
+        # Check if field is None
+        if data.get(field) is None:
+            return True
+
+        # Check if field contains an error dict
+        if isinstance(data.get(field), dict) and data[field].get("error"):
+            return True
+
+    return False
+
+
+def _merge_mongodb_and_alpha_vantage(mongodb_data: Dict[str, Any], av_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Intelligently merge MongoDB and Alpha Vantage data, preferring MongoDB when available.
+
+    Strategy:
+    - For each field, use MongoDB data if it exists and is valid
+    - Use Alpha Vantage data only if MongoDB field is None or contains error
+    - Preserve the ticker field from original data
+
+    Args:
+        mongodb_data: Data from MongoDB (may have missing/error fields)
+        av_data: Data from Alpha Vantage (transformed to MongoDB format)
+
+    Returns:
+        Merged dictionary with best available data from both sources
+    """
+    result = mongodb_data.copy()
+
+    # Merge each top-level field
+    for key in av_data:
+        # Skip ticker field (already set)
+        if key == "ticker":
+            continue
+
+        mongodb_value = result.get(key)
+
+        # Use Alpha Vantage data if:
+        # 1. MongoDB value is None
+        # 2. MongoDB value is an error dict
+        # 3. MongoDB value is an empty list and AV has data
+        should_use_av = False
+
+        if mongodb_value is None:
+            should_use_av = True
+        elif isinstance(mongodb_value, dict) and mongodb_value.get("error"):
+            should_use_av = True
+        elif isinstance(mongodb_value, list) and len(mongodb_value) == 0 and isinstance(av_data[key], list) and len(av_data[key]) > 0:
+            should_use_av = True
+
+        if should_use_av:
+            result[key] = av_data[key]
+            print(f"[FALLBACK] Using Alpha Vantage data for field '{key}'")
+
+    return result
+
+
 def _fetch_single_ticker(ticker: str) -> Dict[str, Any]:
     """
     Fetches all available data for a single ticker from FastAPI endpoints.
@@ -140,6 +211,63 @@ def _fetch_single_ticker(ticker: str) -> Dict[str, Any]:
             data["insider_sentiment"] = response.json().get("insider_sentiment", [])
     except Exception as e:
         data["insider_sentiment"] = {"error": str(e)}
+
+    # ============================================================================
+    # Alpha Vantage Fallback Strategy
+    # ============================================================================
+    # Check if we need to use Alpha Vantage as fallback for missing MongoDB data
+    if _should_use_alpha_vantage_fallback(data):
+        print(f"[INFO] MongoDB data incomplete for {ticker}, attempting Alpha Vantage fallback")
+
+        # Get Alpha Vantage API key from environment
+        api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
+
+        if api_key:
+            try:
+                # Fetch data from all Alpha Vantage endpoints
+                print(f"[FALLBACK] Fetching Alpha Vantage data for {ticker}")
+                overview = _fetch_alpha_vantage_overview(ticker, api_key)
+                earnings = _fetch_alpha_vantage_earnings(ticker, api_key)
+                quote = _fetch_alpha_vantage_quote(ticker, api_key)
+
+                # Check if all Alpha Vantage endpoints returned errors
+                all_failed = all(
+                    isinstance(resp, dict) and resp.get("error")
+                    for resp in [overview, earnings, quote]
+                )
+
+                if all_failed:
+                    print(f"[ERROR] All Alpha Vantage endpoints failed for {ticker}")
+                    # Check if ticker not found specifically
+                    if any(resp.get("error") == "ticker_not_found" for resp in [overview, earnings, quote]):
+                        data["_fallback_status"] = "ticker_not_found"
+                        print(f"[ERROR] Ticker {ticker} not found in Alpha Vantage")
+                    else:
+                        data["_fallback_status"] = "api_error"
+                        print(f"[WARNING] Alpha Vantage API errors for {ticker}, using MongoDB data only")
+                else:
+                    # Transform Alpha Vantage data to MongoDB format
+                    av_data = _transform_av_to_mongodb_format(ticker, overview, earnings, quote)
+
+                    # Merge with MongoDB data (prefer MongoDB when available)
+                    data = _merge_mongodb_and_alpha_vantage(data, av_data)
+
+                    # Validate that critical fields are now populated
+                    still_missing = _should_use_alpha_vantage_fallback(data)
+                    if still_missing:
+                        print(f"[WARNING] Alpha Vantage fallback incomplete for {ticker}, some critical fields still missing")
+                        data["_fallback_status"] = "partial_success"
+                    else:
+                        print(f"[FALLBACK] Successfully merged Alpha Vantage data for {ticker}")
+                        data["_fallback_status"] = "success"
+
+            except Exception as e:
+                print(f"[ERROR] Alpha Vantage fallback failed for {ticker}: {e}")
+                data["_fallback_status"] = "exception"
+                # Continue with MongoDB data even if fallback fails
+        else:
+            print(f"[WARNING] ALPHA_VANTAGE_API_KEY not set, cannot use fallback for {ticker}")
+            data["_fallback_status"] = "no_api_key"
 
     return data
 
@@ -810,6 +938,10 @@ def normalize_financial_data(data: Dict[str, Any]) -> Dict[str, Any]:
         Normalized data with consistent formatting
     """
     normalized = data.copy()
+
+    # Remove internal metadata fields that shouldn't be passed to LLMs
+    normalized.pop("_fallback_status", None)
+    normalized.pop("_metadata", None)
 
     # Normalize revenue to millions (if in different units)
     if normalized.get("earnings_reports") and isinstance(normalized["earnings_reports"], list):

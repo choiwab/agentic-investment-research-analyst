@@ -69,24 +69,68 @@ class NewsScraperAgent:
             }
             try:
                 response = requests.get(url, timeout = 10, headers = headers)
+                response.raise_for_status()  # Raise exception for bad status codes
                 soup = BeautifulSoup(response.text, "html.parser")
                 text = [p.get_text() for p in soup.find_all("p")]
-                return "\n".join(text)
+                content = "\n".join(text)
+
+                # Validate we got meaningful content
+                if not content or len(content.strip()) < 50:
+                    return "Error: No meaningful content found at URL. The page may be empty or require authentication."
+
+                return content
+            except requests.exceptions.Timeout:
+                return "Error: Request timeout - the server took too long to respond."
+            except requests.exceptions.HTTPError as e:
+                return f"Error: HTTP {e.response.status_code} - unable to access the URL."
+            except requests.exceptions.ConnectionError:
+                return "Error: Connection failed - unable to reach the server."
             except Exception as e:
-                return f"Error fetching content: {str(e)}"
-                        
+                return f"Error: Failed to fetch content - {str(e)}"
+
         return [fetch_url_content]
     
     def run(self, state: dict[str, str]) -> dict[str, str]:
         """Agent scrapes/analyzes article"""
-        result = self.agent.invoke({"input" : state['url']})
-        output = result['output']
+        try:
+            result = self.agent.invoke({"input" : state['url']})
+            output = result['output']
 
-        if isinstance(output, dict):
-            parsed_result = output
-        else:
-            parsed_result = self.parser.parse(output)
-        return parsed_result
+            # Check if the agent returned an error message
+            if isinstance(output, str) and output.startswith("Error"):
+                return {
+                    "error": "fetch_failed",
+                    "qualitative_summary": None,
+                    "quantitative_summary": None,
+                    "insight_outlook": None,
+                    "details": output
+                }
+
+            if isinstance(output, dict):
+                parsed_result = output
+            else:
+                parsed_result = self.parser.parse(output)
+
+            # Validate the parsed result has required fields
+            if not all(key in parsed_result for key in ["qualitative_summary", "quantitative_summary", "insight_outlook"]):
+                return {
+                    "error": "invalid_output",
+                    "qualitative_summary": parsed_result.get("qualitative_summary"),
+                    "quantitative_summary": parsed_result.get("quantitative_summary"),
+                    "insight_outlook": parsed_result.get("insight_outlook"),
+                    "details": "Missing required fields in agent output"
+                }
+
+            return parsed_result
+
+        except Exception as e:
+            return {
+                "error": "agent_exception",
+                "qualitative_summary": None,
+                "quantitative_summary": None,
+                "insight_outlook": None,
+                "details": str(e)
+            }
 
 if __name__ == "__main__":
     agent = NewsScraperAgent(model="gpt-4o")

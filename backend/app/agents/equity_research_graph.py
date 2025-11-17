@@ -201,13 +201,21 @@ def metric_extractor_node(state: EquityResearchState) -> EquityResearchState:
     logger.info("📊 Metric Extractor node - Analyzing financial metrics")
 
     try:
+        # Validate ticker exists before proceeding
+        ticker = state.get("ticker")
+        if not ticker:
+            logger.error("❌ Cannot run metric extraction: ticker is missing from state")
+            state["errors"] = state.get("errors", []) + ["Metric extraction skipped: ticker not found"]
+            state["warnings"] = state.get("warnings", []) + ["Preprocessor may have failed to extract ticker"]
+            return state
+
         agent = MetricExtractorAgent(model="gpt-4o")
 
         # Prepare news scraper output for context
         news_context = None
         if state.get("qualitative_summary") or state.get("quantitative_summary"):
             news_context = {
-                state.get("ticker"): {
+                ticker: {
                     "qualitative_summary": state.get("qualitative_summary", ""),
                     "quantitative_summary": state.get("quantitative_summary", ""),
                     "insight_outlook": state.get("insight_outlook", "")
@@ -216,7 +224,7 @@ def metric_extractor_node(state: EquityResearchState) -> EquityResearchState:
 
         # Run metric extraction
         result = agent.run(
-            tickers=[state["ticker"]],
+            tickers=[ticker],
             timeframe=state.get("timeframe"),
             news_scraper_output=news_context
         )
@@ -294,8 +302,27 @@ def sentiment_extractor_node(state: EquityResearchState) -> EquityResearchState:
 
                 logger.info(f"✅ Sentiment analysis completed: {result['sentiment'].get('label')}")
         else:
-            logger.warning("⚠️ No text available for sentiment analysis")
-            state["warnings"] = state.get("warnings", []) + ["No text for sentiment analysis"]
+            # Initialize neutral sentiment when no text available
+            logger.warning("⚠️ No text available for sentiment analysis, setting neutral defaults")
+            state.update({
+                "sentiment_label": "neutral",
+                "sentiment_confidence": 0.5,
+                "sentiment_probs": {
+                    "p_neg_mean": 0.33,
+                    "p_neu_mean": 0.34,
+                    "p_pos_mean": 0.33
+                },
+                "sentiment_stability": {
+                    "p_neg_var": 0.0,
+                    "entropy_mean": 1.0  # Maximum entropy = neutral
+                },
+                "sentiment_evidence": {
+                    "top_negative": [],
+                    "top_positive": []
+                },
+                "current_node": "sentiment_extractor"
+            })
+            state["warnings"] = state.get("warnings", []) + ["No text for sentiment analysis - using neutral defaults"]
 
     except Exception as e:
         logger.error(f"❌ Error in sentiment extractor: {str(e)}")

@@ -190,9 +190,12 @@ Classify this query and provide your reasoning."""
             seen_tokens.add(normalized)
             ticker_candidate = normalized
 
+            # Check if ticker exists in MongoDB
             db_has_ticker = self._ticker_exists_in_db(ticker_candidate)
+
+            # Allow ticker even if not in MongoDB - let metric extractor handle Alpha Vantage fallback
             if db_has_ticker is False:
-                continue
+                print(f"[INFO] Ticker {ticker_candidate} not in MongoDB, will use Alpha Vantage fallback")
 
             print(f"[DEBUG] Found explicit ticker in query: {ticker_candidate}")
             return ticker_candidate
