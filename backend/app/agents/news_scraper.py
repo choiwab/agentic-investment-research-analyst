@@ -14,7 +14,7 @@ from utils.model_schema import NewsModel
 
 
 class NewsScraperAgent:
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, model: str = "gpt-4o") -> None:
         self.callback_handler = PrintCallbackHandler()
         self.llm = ChatOpenAI(model=model, temperature=0, streaming=True, callbacks=[self.callback_handler])
         self.memory = SafeConversationMemory(
@@ -89,7 +89,7 @@ class NewsScraperAgent:
         return parsed_result
 
 if __name__ == "__main__":
-    agent = NewsScraperAgent(model="gpt-4o-mini")
+    agent = NewsScraperAgent(model="gpt-4o")
     state = {'url': "https://finnhub.io/api/news?id=bec745cd1ffd8d5793fcd33ceb7c795378e49a5"}   # Example
     results = agent.run(state)
     print('Qualitative Summary: ', results['qualitative_summary'])
