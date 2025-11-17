@@ -24,7 +24,7 @@ load_dotenv(override=True)
 
 
 class MetricExtractorAgent:
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, model: str = "gpt-4o") -> None:
         self.callback_handler = PrintCallbackHandler()
         self.llm = ChatOpenAI(
             model=model,
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("INITIALIZING METRIC EXTRACTOR AGENT")
     print("=" * 80)
-    agent = MetricExtractorAgent(model="gpt-4o-mini")
+    agent = MetricExtractorAgent(model="gpt-4o")
     print("✓ Agent initialized successfully\n")
 
     # Get available tickers from the database

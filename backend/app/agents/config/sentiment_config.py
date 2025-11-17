@@ -83,7 +83,7 @@ class SentimentConfig:
     }
 
     LLM_CONFIG = {
-        'model': "gpt-4o-mini",
+        'model': "gpt-4o",
         'temperature': 0.0,
         'streaming': True,
         'timeout': 300

@@ -76,12 +76,12 @@ class ResearchCompilerAgent:
         }
     }
 
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, model: str = "gpt-4o") -> None:
         """
         Initialize the Research Compiler Agent
 
         Args:
-            model: Model name (default: gpt-4o-mini for OpenAI)
+            model: Model name (default: gpt-4o for OpenAI)
         """
         self.callback_handler = PrintCallbackHandler()
 
@@ -1110,7 +1110,7 @@ class ResearchCompilerAgent:
 if __name__ == "__main__":
     # Initialize agent
     print("Initializing Research Compiler Agent...")
-    agent = ResearchCompilerAgent(model="gpt-4o-mini")
+    agent = ResearchCompilerAgent(model="gpt-4o")
 
     # Test 1: Company Analysis (finance-company)
     print("\n" + "="*50)
