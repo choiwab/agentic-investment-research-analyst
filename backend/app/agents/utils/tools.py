@@ -346,6 +346,7 @@ def _transform_av_to_mongodb_format(
     - If an entire endpoint fails (error dict), that section is set to None
     - If specific fields are missing, they default to None via _safe_float()
     - Returns valid structure even if all inputs are None/errors
+    - Compatible with normalize_financial_data() and detect_anomalies()
 
     Args:
         ticker: Stock ticker symbol
@@ -361,12 +362,12 @@ def _transform_av_to_mongodb_format(
         "company": None,
         "market_data": None,
         "basic_financials": None,
-        "earnings_reports": None,
-        "earnings_surprises": None,
-        "news": None,  # Not available from Alpha Vantage free tier
-        "sec_filings": None,  # Not available from Alpha Vantage free tier
-        "financials_reported": None,
-        "insider_sentiment": None  # Not available from Alpha Vantage
+        "earnings_reports": [],  # Default to empty list, not None
+        "earnings_surprises": [],  # Default to empty list, not None
+        "news": [],  # Not available from Alpha Vantage free tier
+        "sec_filings": [],  # Not available from Alpha Vantage free tier
+        "financials_reported": [],
+        "insider_sentiment": []  # Not available from Alpha Vantage
     }
 
     # Check if overview contains error
@@ -391,9 +392,11 @@ def _transform_av_to_mongodb_format(
             "description": overview.get("Description")
         }
 
+        # Create basic_financials with metric dict
+        # normalize_financial_data expects this structure
         result["basic_financials"] = {
             "metric": {
-                # Valuation metrics
+                # Valuation metrics (used by detect_anomalies)
                 "peBasicExclExtraTTM": _safe_float(overview.get("PERatio")),
                 "pbRatio": _safe_float(overview.get("PriceToBookRatio")),
                 "psTTM": _safe_float(overview.get("PriceToSalesRatioTTM")),
@@ -414,7 +417,7 @@ def _transform_av_to_mongodb_format(
                 "bookValuePerShareQuarterly": _safe_float(overview.get("BookValue")),
                 "dividendPerShareTTM": _safe_float(overview.get("DividendPerShare")),
 
-                # Other metrics
+                # Other metrics (used by detect_anomalies for 52-week high/low)
                 "52WeekHigh": _safe_float(overview.get("52WeekHigh")),
                 "52WeekLow": _safe_float(overview.get("52WeekLow")),
                 "beta": _safe_float(overview.get("Beta"))
@@ -426,7 +429,13 @@ def _transform_av_to_mongodb_format(
     quote_has_error = quote is None or (isinstance(quote, dict) and quote.get("error"))
 
     # Transform GLOBAL_QUOTE data into market_data
+    # normalize_financial_data expects fields: c, h, l, o, pc
     if not quote_has_error and quote:
+        # Safe extraction with fallback to None
+        change_percent_raw = quote.get("10. change percent", "")
+        if isinstance(change_percent_raw, str):
+            change_percent_raw = change_percent_raw.replace("%", "")
+
         result["market_data"] = {
             "c": _safe_float(quote.get("05. price")),  # Current price
             "h": _safe_float(quote.get("03. high")),   # High
@@ -436,18 +445,28 @@ def _transform_av_to_mongodb_format(
             "t": None,  # Timestamp not directly available
             "volume": _safe_float(quote.get("06. volume")),
             "change": _safe_float(quote.get("09. change")),
-            "changePercent": _safe_float(quote.get("10. change percent", "").replace("%", "") if isinstance(quote.get("10. change percent"), str) else quote.get("10. change percent"))
+            "changePercent": _safe_float(change_percent_raw)
         }
 
     # Check if earnings contains error
     earnings_has_error = earnings is None or (isinstance(earnings, dict) and earnings.get("error"))
 
     # Transform EARNINGS data into earnings_reports
+    # normalize_financial_data and detect_anomalies expect list format
     if not earnings_has_error and earnings and earnings.get("quarterlyEarnings"):
-        quarterly = earnings["quarterlyEarnings"]
+        quarterly = earnings.get("quarterlyEarnings", [])
+
+        # Ensure we have a list
+        if not isinstance(quarterly, list):
+            quarterly = []
+
         result["earnings_reports"] = []
 
         for report in quarterly[:8]:  # Get last 8 quarters
+            # Skip if report is not a dict
+            if not isinstance(report, dict):
+                continue
+
             fiscal_date = report.get("fiscalDateEnding", "")
 
             # Parse year and quarter from fiscalDateEnding (format: YYYY-MM-DD)
@@ -459,42 +478,45 @@ def _transform_av_to_mongodb_format(
                     month = int(fiscal_date[5:7])
                     quarter = (month - 1) // 3 + 1
                 except (ValueError, IndexError):
+                    # If parsing fails, leave as None
                     pass
 
             eps_actual = _safe_float(report.get("reportedEPS"))
             eps_estimate = _safe_float(report.get("estimatedEPS"))
 
+            # Build earnings entry - matches MongoDB structure
             earnings_entry = {
                 "period": fiscal_date,
                 "year": year,
                 "quarter": quarter,
                 "epsActual": eps_actual,
                 "epsEstimate": eps_estimate,
-                "revenueActual": None,  # Not in quarterly earnings
+                "revenueActual": None,  # Not available in Alpha Vantage quarterly earnings
                 "revenueEstimate": None,
                 "surprisePercent": None
             }
 
-            # Calculate surprise percentage
+            # Calculate surprise percentage if we have both values
             if eps_actual is not None and eps_estimate is not None and eps_estimate != 0:
                 earnings_entry["surprisePercent"] = ((eps_actual - eps_estimate) / abs(eps_estimate)) * 100
 
             result["earnings_reports"].append(earnings_entry)
 
         # Also populate earnings_surprises with the same data
-        result["earnings_surprises"] = [
-            {
-                "period": e["period"],
-                "year": e["year"],
-                "quarter": e["quarter"],
-                "actual": e["epsActual"],
-                "estimate": e["epsEstimate"],
-                "surprise": e["epsActual"] - e["epsEstimate"] if e["epsActual"] and e["epsEstimate"] else None,
-                "surprisePercent": e["surprisePercent"]
-            }
-            for e in result["earnings_reports"]
-            if e.get("epsActual") is not None and e.get("epsEstimate") is not None
-        ]
+        # detect_anomalies expects this format with 'surprisePercent' field
+        result["earnings_surprises"] = []
+        for e in result["earnings_reports"]:
+            # Only include if we have actual and estimate values
+            if e.get("epsActual") is not None and e.get("epsEstimate") is not None:
+                result["earnings_surprises"].append({
+                    "period": e["period"],
+                    "year": e["year"],
+                    "quarter": e["quarter"],
+                    "actual": e["epsActual"],
+                    "estimate": e["epsEstimate"],
+                    "surprise": e["epsActual"] - e["epsEstimate"] if e["epsActual"] and e["epsEstimate"] else None,
+                    "surprisePercent": e["surprisePercent"]
+                })
 
     return result
 
