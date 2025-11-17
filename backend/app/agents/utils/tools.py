@@ -144,6 +144,361 @@ def _fetch_single_ticker(ticker: str) -> Dict[str, Any]:
     return data
 
 
+# ============================================================================
+# Alpha Vantage Fallback Functions
+# ============================================================================
+
+def _fetch_alpha_vantage_overview(ticker: str, api_key: str) -> Dict[str, Any]:
+    """
+    Fetch company overview and financial data from Alpha Vantage OVERVIEW endpoint.
+
+    Args:
+        ticker: Stock ticker symbol
+        api_key: Alpha Vantage API key
+
+    Returns:
+        Dictionary with overview data, or error dict if request fails
+        Error types: {"error": "ticker_not_found"}, {"error": "rate_limit"},
+                     {"error": "api_error", "details": str}
+    """
+    if not api_key:
+        return {"error": "no_api_key", "details": "ALPHA_VANTAGE_API_KEY not configured"}
+
+    try:
+        url = "https://www.alphavantage.co/query"
+        params = {
+            "function": "OVERVIEW",
+            "symbol": ticker,
+            "apikey": api_key
+        }
+        response = requests.get(url, params=params, timeout=10)
+
+        if response.status_code != 200:
+            return {"error": "api_error", "details": f"HTTP {response.status_code}"}
+
+        data = response.json()
+
+        # Check for rate limit (Alpha Vantage returns "Note" field)
+        if "Note" in data:
+            return {"error": "rate_limit", "message": data.get("Note")}
+
+        # Check for error message (invalid ticker or other errors)
+        if "Error Message" in data:
+            return {"error": "ticker_not_found", "details": data.get("Error Message")}
+
+        # Check if data is empty or invalid
+        if not data or not data.get("Symbol"):
+            return {"error": "ticker_not_found", "details": "No data returned for ticker"}
+
+        # Verify the ticker matches (case-insensitive)
+        if data.get("Symbol", "").upper() != ticker.upper():
+            return {"error": "ticker_not_found", "details": f"Ticker mismatch: requested {ticker}, got {data.get('Symbol')}"}
+
+        return data
+
+    except requests.exceptions.Timeout:
+        return {"error": "api_error", "details": "Request timeout"}
+    except requests.exceptions.ConnectionError:
+        return {"error": "api_error", "details": "Connection error"}
+    except Exception as e:
+        return {"error": "api_error", "details": str(e)}
+
+
+def _fetch_alpha_vantage_earnings(ticker: str, api_key: str) -> Dict[str, Any]:
+    """
+    Fetch earnings data from Alpha Vantage EARNINGS endpoint.
+
+    Args:
+        ticker: Stock ticker symbol
+        api_key: Alpha Vantage API key
+
+    Returns:
+        Dictionary with earnings data, or error dict if request fails
+        Error types: {"error": "ticker_not_found"}, {"error": "rate_limit"},
+                     {"error": "api_error", "details": str}
+    """
+    if not api_key:
+        return {"error": "no_api_key", "details": "ALPHA_VANTAGE_API_KEY not configured"}
+
+    try:
+        url = "https://www.alphavantage.co/query"
+        params = {
+            "function": "EARNINGS",
+            "symbol": ticker,
+            "apikey": api_key
+        }
+        response = requests.get(url, params=params, timeout=10)
+
+        if response.status_code != 200:
+            return {"error": "api_error", "details": f"HTTP {response.status_code}"}
+
+        data = response.json()
+
+        # Check for rate limit
+        if "Note" in data:
+            return {"error": "rate_limit", "message": data.get("Note")}
+
+        # Check for error message
+        if "Error Message" in data:
+            return {"error": "ticker_not_found", "details": data.get("Error Message")}
+
+        # Validate we got earnings data
+        if not data or (not data.get("quarterlyEarnings") and not data.get("annualEarnings")):
+            return {"error": "no_data", "details": "No earnings data available"}
+
+        return data
+
+    except requests.exceptions.Timeout:
+        return {"error": "api_error", "details": "Request timeout"}
+    except requests.exceptions.ConnectionError:
+        return {"error": "api_error", "details": "Connection error"}
+    except Exception as e:
+        return {"error": "api_error", "details": str(e)}
+
+
+def _fetch_alpha_vantage_quote(ticker: str, api_key: str) -> Dict[str, Any]:
+    """
+    Fetch real-time market data from Alpha Vantage GLOBAL_QUOTE endpoint.
+
+    Args:
+        ticker: Stock ticker symbol
+        api_key: Alpha Vantage API key
+
+    Returns:
+        Dictionary with quote data, or error dict if request fails
+        Error types: {"error": "ticker_not_found"}, {"error": "rate_limit"},
+                     {"error": "api_error", "details": str}
+    """
+    if not api_key:
+        return {"error": "no_api_key", "details": "ALPHA_VANTAGE_API_KEY not configured"}
+
+    try:
+        url = "https://www.alphavantage.co/query"
+        params = {
+            "function": "GLOBAL_QUOTE",
+            "symbol": ticker,
+            "apikey": api_key
+        }
+        response = requests.get(url, params=params, timeout=10)
+
+        if response.status_code != 200:
+            return {"error": "api_error", "details": f"HTTP {response.status_code}"}
+
+        data = response.json()
+
+        # Check for rate limit
+        if "Note" in data:
+            return {"error": "rate_limit", "message": data.get("Note")}
+
+        # Check for error message
+        if "Error Message" in data:
+            return {"error": "ticker_not_found", "details": data.get("Error Message")}
+
+        # Extract the Global Quote object
+        quote = data.get("Global Quote", {})
+        if not quote or not quote.get("01. symbol"):
+            return {"error": "ticker_not_found", "details": "No quote data available"}
+
+        return quote
+
+    except requests.exceptions.Timeout:
+        return {"error": "api_error", "details": "Request timeout"}
+    except requests.exceptions.ConnectionError:
+        return {"error": "api_error", "details": "Connection error"}
+    except Exception as e:
+        return {"error": "api_error", "details": str(e)}
+
+
+def _safe_float(value: Any) -> Any:
+    """
+    Safely convert a value to float, returning None if conversion fails.
+
+    Args:
+        value: Value to convert (can be string, number, None, etc.)
+
+    Returns:
+        Float value or None if conversion fails or value is invalid
+    """
+    if value is None or value == "None" or value == "" or value == "N/A":
+        return None
+    try:
+        # Handle percentage strings (e.g., "5.2%")
+        if isinstance(value, str) and "%" in value:
+            value = value.replace("%", "")
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
+
+def _transform_av_to_mongodb_format(
+    ticker: str,
+    overview: Dict[str, Any] = None,
+    earnings: Dict[str, Any] = None,
+    quote: Dict[str, Any] = None
+) -> Dict[str, Any]:
+    """
+    Transform Alpha Vantage API responses to match MongoDB data structure.
+
+    This function maps Alpha Vantage data to the expected format used by the
+    metric extractor agent, matching the structure returned by _fetch_single_ticker().
+
+    Handles missing data gracefully:
+    - If an entire endpoint fails (error dict), that section is set to None
+    - If specific fields are missing, they default to None via _safe_float()
+    - Returns valid structure even if all inputs are None/errors
+
+    Args:
+        ticker: Stock ticker symbol
+        overview: Data from OVERVIEW endpoint (can be None or error dict)
+        earnings: Data from EARNINGS endpoint (can be None or error dict)
+        quote: Data from GLOBAL_QUOTE endpoint (can be None or error dict)
+
+    Returns:
+        Dictionary matching MongoDB structure with all available data
+    """
+    result = {
+        "ticker": ticker,
+        "company": None,
+        "market_data": None,
+        "basic_financials": None,
+        "earnings_reports": None,
+        "earnings_surprises": None,
+        "news": None,  # Not available from Alpha Vantage free tier
+        "sec_filings": None,  # Not available from Alpha Vantage free tier
+        "financials_reported": None,
+        "insider_sentiment": None  # Not available from Alpha Vantage
+    }
+
+    # Check if overview contains error
+    overview_has_error = overview is None or (isinstance(overview, dict) and overview.get("error"))
+
+    # Transform OVERVIEW data into company and basic_financials
+    if not overview_has_error and overview:
+        result["company"] = {
+            "ticker": ticker,
+            "name": overview.get("Name"),
+            "country": overview.get("Country"),
+            "currency": overview.get("Currency"),
+            "exchange": overview.get("Exchange"),
+            "ipo": overview.get("IPODate"),
+            "marketCapitalization": _safe_float(overview.get("MarketCapitalization")),
+            "phone": overview.get("Phone"),
+            "shareOutstanding": _safe_float(overview.get("SharesOutstanding")),
+            "weburl": overview.get("OfficialSite"),
+            "logo": None,  # Not available from Alpha Vantage
+            "finnhubIndustry": overview.get("Sector"),
+            "industry": overview.get("Industry"),
+            "description": overview.get("Description")
+        }
+
+        result["basic_financials"] = {
+            "metric": {
+                # Valuation metrics
+                "peBasicExclExtraTTM": _safe_float(overview.get("PERatio")),
+                "pbRatio": _safe_float(overview.get("PriceToBookRatio")),
+                "psTTM": _safe_float(overview.get("PriceToSalesRatioTTM")),
+                "pegRatio": _safe_float(overview.get("PEGRatio")),
+
+                # Profitability metrics
+                "profitMarginTTM": _safe_float(overview.get("ProfitMargin")),
+                "operatingMarginTTM": _safe_float(overview.get("OperatingMarginTTM")),
+                "roaTTM": _safe_float(overview.get("ReturnOnAssetsTTM")),
+                "roeTTM": _safe_float(overview.get("ReturnOnEquityTTM")),
+
+                # Growth metrics
+                "revenueGrowthTTM": _safe_float(overview.get("QuarterlyRevenueGrowthYOY")),
+                "revenueGrowthQuarterlyYoy": _safe_float(overview.get("QuarterlyRevenueGrowthYOY")),
+                "epsGrowthTTMYoy": _safe_float(overview.get("QuarterlyEarningsGrowthYOY")),
+
+                # Per-share metrics
+                "bookValuePerShareQuarterly": _safe_float(overview.get("BookValue")),
+                "dividendPerShareTTM": _safe_float(overview.get("DividendPerShare")),
+
+                # Other metrics
+                "52WeekHigh": _safe_float(overview.get("52WeekHigh")),
+                "52WeekLow": _safe_float(overview.get("52WeekLow")),
+                "beta": _safe_float(overview.get("Beta"))
+            },
+            "series": {}  # Alpha Vantage doesn't provide time series in OVERVIEW
+        }
+
+    # Check if quote contains error
+    quote_has_error = quote is None or (isinstance(quote, dict) and quote.get("error"))
+
+    # Transform GLOBAL_QUOTE data into market_data
+    if not quote_has_error and quote:
+        result["market_data"] = {
+            "c": _safe_float(quote.get("05. price")),  # Current price
+            "h": _safe_float(quote.get("03. high")),   # High
+            "l": _safe_float(quote.get("04. low")),    # Low
+            "o": _safe_float(quote.get("02. open")),   # Open
+            "pc": _safe_float(quote.get("08. previous close")),  # Previous close
+            "t": None,  # Timestamp not directly available
+            "volume": _safe_float(quote.get("06. volume")),
+            "change": _safe_float(quote.get("09. change")),
+            "changePercent": _safe_float(quote.get("10. change percent", "").replace("%", "") if isinstance(quote.get("10. change percent"), str) else quote.get("10. change percent"))
+        }
+
+    # Check if earnings contains error
+    earnings_has_error = earnings is None or (isinstance(earnings, dict) and earnings.get("error"))
+
+    # Transform EARNINGS data into earnings_reports
+    if not earnings_has_error and earnings and earnings.get("quarterlyEarnings"):
+        quarterly = earnings["quarterlyEarnings"]
+        result["earnings_reports"] = []
+
+        for report in quarterly[:8]:  # Get last 8 quarters
+            fiscal_date = report.get("fiscalDateEnding", "")
+
+            # Parse year and quarter from fiscalDateEnding (format: YYYY-MM-DD)
+            year = None
+            quarter = None
+            if fiscal_date:
+                try:
+                    year = int(fiscal_date[:4])
+                    month = int(fiscal_date[5:7])
+                    quarter = (month - 1) // 3 + 1
+                except (ValueError, IndexError):
+                    pass
+
+            eps_actual = _safe_float(report.get("reportedEPS"))
+            eps_estimate = _safe_float(report.get("estimatedEPS"))
+
+            earnings_entry = {
+                "period": fiscal_date,
+                "year": year,
+                "quarter": quarter,
+                "epsActual": eps_actual,
+                "epsEstimate": eps_estimate,
+                "revenueActual": None,  # Not in quarterly earnings
+                "revenueEstimate": None,
+                "surprisePercent": None
+            }
+
+            # Calculate surprise percentage
+            if eps_actual is not None and eps_estimate is not None and eps_estimate != 0:
+                earnings_entry["surprisePercent"] = ((eps_actual - eps_estimate) / abs(eps_estimate)) * 100
+
+            result["earnings_reports"].append(earnings_entry)
+
+        # Also populate earnings_surprises with the same data
+        result["earnings_surprises"] = [
+            {
+                "period": e["period"],
+                "year": e["year"],
+                "quarter": e["quarter"],
+                "actual": e["epsActual"],
+                "estimate": e["epsEstimate"],
+                "surprise": e["epsActual"] - e["epsEstimate"] if e["epsActual"] and e["epsEstimate"] else None,
+                "surprisePercent": e["surprisePercent"]
+            }
+            for e in result["earnings_reports"]
+            if e.get("epsActual") is not None and e.get("epsEstimate") is not None
+        ]
+
+    return result
+
+
 @tool
 def fetch_peers(ticker: Union[str, List[str]]) -> Dict[str, Any]:
     """
