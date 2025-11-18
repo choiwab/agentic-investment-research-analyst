@@ -68,6 +68,18 @@ CORPORATE_SUFFIXES = {
 
 CLASS_DESIGNATORS = {"CLASS", "CL", "SHARE", "SHARES", "SERIES", "ADR", "ADS", "UNIT", "UNITS"}
 
+COMPANY_KEYWORD_STOPWORDS = {word.lower() for word in TICKER_STOPWORDS}
+COMPANY_KEYWORD_STOPWORDS.update({
+    "should", "would", "could", "please", "need", "want", "wish", "think", "give", "show",
+    "tell", "about", "invest", "investing", "investment", "investor", "buy", "sell", "hold",
+    "analysis", "advise", "advice", "opinion", "looking", "look", "news", "update", "info",
+    "information", "consider", "considering", "trend", "trends", "future", "outlook", "best",
+    "worst", "today", "tomorrow", "next", "company", "stock", "stocks"
+})
+
+MAX_KEYWORD_REGEX_LOOKUPS = 8
+MAX_KEYWORD_CANDIDATES = 250
+
 class PreprocessAgent:
     """
     Preprocessing agent using OpenAI models.
@@ -293,6 +305,35 @@ Query: "{query}"
 
         return " ".join(simplified_tokens).strip()
 
+    def _extract_keyword_tokens(self, text: str) -> List[str]:
+        """Extract meaningful keyword tokens from text for fuzzy lookup."""
+        if not text:
+            return []
+
+        keywords: List[str] = []
+        seen: set[str] = set()
+
+        for raw_token in re.split(r"[^A-Za-z0-9&]+", text):
+            token = raw_token.strip()
+            if not token:
+                continue
+
+            upper_token = token.upper()
+            lower_token = token.lower()
+            if upper_token in CORPORATE_SUFFIXES or upper_token in CLASS_DESIGNATORS:
+                continue
+            if upper_token in TICKER_STOPWORDS or lower_token in COMPANY_KEYWORD_STOPWORDS:
+                continue
+            if len(token) < 2:
+                continue
+            if lower_token in seen:
+                continue
+
+            seen.add(lower_token)
+            keywords.append(token)
+
+        return keywords
+
     def _lookup_ticker_by_company_name(self, company_name: str) -> Optional[str]:
         """Map a company name to its ticker using the companies collection."""
         if not company_name:
@@ -330,6 +371,23 @@ Query: "{query}"
             self._company_lookup_cache[cache_key] = None
             return None
 
+    def _lookup_ticker_from_query_keywords(self, query: str) -> Optional[str]:
+        """Fallback: use keyword-based fuzzy matching directly on the user query."""
+        if not query:
+            return None
+
+        collection = _get_companies_collection()
+        if collection is None:
+            print("[DEBUG] MongoDB connection unavailable for keyword fallback lookup")
+            return None
+
+        ticker = self._fuzzy_company_lookup(collection, query)
+        if ticker:
+            print(f"[DEBUG] Keyword-based fallback matched query to ticker '{ticker}'")
+        else:
+            print("[DEBUG] Keyword-based fallback lookup could not find a ticker match")
+        return ticker
+
     def _match_company_name_in_collection(self, collection, candidate: str) -> Optional[str]:
         """Perform direct regex matches for a candidate company name."""
         if not candidate:
@@ -355,18 +413,46 @@ Query: "{query}"
         if not normalized_target:
             return None
 
-        keywords = [token for token in re.split(r"[^A-Za-z0-9&]+", company_name) if token]
-        regex = None
-        for keyword in keywords:
-            keyword_upper = keyword.upper()
-            if keyword_upper in CORPORATE_SUFFIXES or keyword_upper in CLASS_DESIGNATORS:
+        keywords = self._extract_keyword_tokens(company_name)
+        if not keywords and company_name:
+            keywords = [company_name.strip()]
+
+        # Prioritize longer, more descriptive keywords while preserving stability for ties.
+        prioritized_keywords: List[str] = []
+        if keywords:
+            enumerated_keywords = list(enumerate(keywords))
+            prioritized_keywords = [
+                kw for _, kw in sorted(
+                    enumerated_keywords,
+                    key=lambda item: (-len(item[1]), item[0])
+                )
+            ][:MAX_KEYWORD_REGEX_LOOKUPS]
+
+        candidate_map: dict[str, dict] = {}
+        for keyword in prioritized_keywords:
+            if not keyword:
                 continue
-            if len(keyword) >= 2:
-                regex = re.compile(re.escape(keyword), re.IGNORECASE)
+
+            regex = re.compile(re.escape(keyword), re.IGNORECASE)
+            try:
+                cursor = collection.find({"name": regex}, {"_id": 1, "name": 1}).limit(40)
+            except Exception as e:
+                print(f"[ERROR] Candidate lookup failed for keyword '{keyword}': {e}")
+                continue
+
+            for doc in cursor:
+                ticker = doc.get("_id")
+                if not ticker or ticker in candidate_map:
+                    continue
+                candidate_map[ticker] = doc
+
+            if len(candidate_map) >= MAX_KEYWORD_CANDIDATES:
                 break
 
-        query = {"name": regex} if regex else {}
-        candidates = list(collection.find(query, {"_id": 1, "name": 1}).limit(50))
+        candidates = list(candidate_map.values())
+        if not candidates:
+            return None
+
         return self._pick_best_company_match(normalized_target, candidates)
 
     def _pick_best_company_match(self, normalized_target: str, candidates: List[dict]) -> Optional[str]:
@@ -394,11 +480,17 @@ Query: "{query}"
             return ""
 
         text = re.sub(r"\(.*?\)", "", text.lower())
-        tokens = [
-            token
-            for token in re.split(r"[^a-z0-9&]+", text)
-            if token and token.upper() not in CORPORATE_SUFFIXES and token.upper() not in CLASS_DESIGNATORS
-        ]
+        tokens: List[str] = []
+        for token in re.split(r"[^a-z0-9&]+", text):
+            if not token:
+                continue
+            upper_token = token.upper()
+            if upper_token in CORPORATE_SUFFIXES or upper_token in CLASS_DESIGNATORS:
+                continue
+            if upper_token in TICKER_STOPWORDS or token in COMPANY_KEYWORD_STOPWORDS:
+                continue
+            tokens.append(token)
+
         return " ".join(tokens).strip()
 
     def _extract_ticker(self, query: str) -> Optional[str]:
@@ -409,15 +501,16 @@ Query: "{query}"
 
         company_names = self._extract_company_names(query)
         if not company_names:
-            print("[DEBUG] No company names detected in query for ticker lookup")
-            return None
+            print("[DEBUG] No company names detected; attempting keyword-based fuzzy lookup")
+            return self._lookup_ticker_from_query_keywords(query)
 
         for company_name in company_names:
             ticker = self._lookup_ticker_by_company_name(company_name)
             if ticker:
                 return ticker
 
-        return None
+        print("[DEBUG] Company names extracted but no ticker match; attempting keyword-based fallback")
+        return self._lookup_ticker_from_query_keywords(query)
 
     def _extract_timeframe(self, query: str) -> str:
         """Extract or default timeframe."""
