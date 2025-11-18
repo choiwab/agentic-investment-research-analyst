@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from dotenv import load_dotenv
 from langchain.output_parsers import StructuredOutputParser
+from langchain.prompts import PromptTemplate
 from langchain.schema import HumanMessage
 from langchain.tools import StructuredTool
 from langchain.agents import initialize_agent, AgentType
