@@ -2,7 +2,8 @@ import json
 import os
 import re
 from difflib import SequenceMatcher
-from typing import List, Optional
+from typing import List, Optional, Literal
+from pydantic import BaseModel, Field
 
 from dotenv import load_dotenv
 from langchain.output_parsers import StructuredOutputParser
@@ -12,6 +13,7 @@ from langchain.tools import StructuredTool
 from langchain.agents import initialize_agent, AgentType
 from langchain_openai import ChatOpenAI
 from pymongo import MongoClient
+import certifi
 
 # Import utils function and models
 from utils.callback_handler import PrintCallbackHandler
@@ -39,7 +41,7 @@ def _get_companies_collection():
         return None
 
     try:
-        _MONGO_CLIENT = MongoClient(ATLAS_URI, serverSelectionTimeoutMS=5000)
+        _MONGO_CLIENT = MongoClient(ATLAS_URI, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where())
         db_name = MONGODB_DB or "test"
         _COMPANIES_COLLECTION = _MONGO_CLIENT[db_name]["companies"]
     except Exception as e:
@@ -98,9 +100,6 @@ class PreprocessAgent:
 
     def _classify_intent(self, query: str) -> str:
         """Classify the intent of the query using OpenAI with structured output."""
-        from typing import Literal
-
-        from pydantic import BaseModel, Field
 
         class IntentClassification(BaseModel):
             """Intent classification result"""
@@ -236,8 +235,6 @@ Classify this query and provide your reasoning."""
 
     def _extract_company_names(self, query: str) -> List[str]:
         """Use the LLM to extract company names mentioned in the query."""
-        from pydantic import BaseModel, Field
-
         class CompanyExtraction(BaseModel):
             company_names: List[str] = Field(
                 default_factory=list,
@@ -656,7 +653,7 @@ Answer:"""
                     1. Use the 'web_search' tool to find recent, relevant information about the company.
                         - Always call the tool using this exact structure:
                             Action: web_search
-                            Action Input: <company name or ticker> recent financial news OR earnings report OR investor update OR press release
+                            Action Input: <company name> recent financial news OR earnings report OR investor update OR press release
                         - Never use parentheses. 
                                              
                     2. **Select a page that meets ALL of the following criteria:**
