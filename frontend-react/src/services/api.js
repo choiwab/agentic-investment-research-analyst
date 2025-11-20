@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://agentic-investment
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 120000, // 2 minutes for LLM processing
+  timeout: 300000, // 5 minutes for LLM processing (equity research takes time)
   headers: {
     'Content-Type': 'application/json',
   },

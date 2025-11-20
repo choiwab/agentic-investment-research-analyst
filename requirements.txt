@@ -25,4 +25,4 @@ yfinance
 pandas==2.2.3
 numpy
 scipy
-
+yahooquery
